@@ -1,13 +1,13 @@
 export class Player {
   #sprite
   #health
-  #speed
+  speed
   #name
   #position
   constructor(img,name) {
     this.#name = name;
     this.#health = 100;
-    this.#speed = 200;
+    this.speed = 200;
     
     this.#sprite = new Image(256,256); 
     this.#sprite.src = img;
@@ -34,14 +34,13 @@ export class Player {
  }
 
  getPosition() {
-  return {x:this.#sprite.width, y: this.#sprite.height};
+  return {x:this.#position.x, y: this.#position.y};
  }
 
  move (vector2) {
-    this.#position.x = vector2.x;
-    this.#position.y = vector2.y;
+    this.#position.x += vector2.x;
+    this.#position.y += vector2.y;
+    // console.log(this.#position);
  }
-
-
 
 }
