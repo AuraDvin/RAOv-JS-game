@@ -7,3 +7,6 @@ canvas{
   border: none;
   z-index: 1;
 }
+canvas#ui{
+  z-index: 2;
+}

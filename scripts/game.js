@@ -4,9 +4,14 @@ import { KeysHandler, KeysPressed } from './movementHandler.js';
 let player;
 /** @type {HTMLCanvasElement} */
 let canvas;
+/** @type {HTMLCanvasElement} */
+let canvasUI;
 /** @type {CanvasRenderingContext2D} */
 let ctx;
-let cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+/** @type {CanvasRenderingContext2D} */
+let ctxUI;
+// let cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+let canvasZoom = 1;
 let cameraZoom = 1;
 let isRunning = true;
 const MAX_ZOOM = 2;
@@ -14,7 +19,8 @@ const MIN_ZOOM = 0.4;
 const SCROLL_SENSITIVITY = 0.0005
 let lastRender = 0;
 let assets = "../assets/";
-
+const view = [1, 0, 0, 1, 0, 0];  // Matrix representing the view. (scale, 0, 0, scale, widthNew, HeightNew)
+let fps;
 
 addEventListener('DOMContentLoaded', () => {
   player = new Player(assets + 'player.png', 'Bingus Janez');
@@ -22,29 +28,43 @@ addEventListener('DOMContentLoaded', () => {
   canvas.width = 1920;
   canvas.height = 1080;
 
+  canvasUI = document.getElementById('ui');
+  canvasUI.width = 1920;
+  canvasUI.height = 1080;
+
   ctx = canvas.getContext('2d');
-  // ctx.translate(window.innerWidth / 2, window.innerHeight / 2);
-  // ctx.scale(cameraZoom, cameraZoom);
-  // ctx.translate(-window.innerWidth / 2 + cameraOffset.x, -window.innerHeight / 2 + cameraOffset.y);
-  // drawBG();
-  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+  ctxUI = canvasUI.getContext('2d');
+  ctxUI.font = '42px Sans-serif';
   addEventListener('wheel', scaleHandler, false);
   addEventListener('keydown', KeysHandler, false);
   addEventListener('keyup', KeysHandler, false);
   addEventListener('mouseover', () => { canvas.focus(); });
+
   window.requestAnimationFrame(loop);
 });
 
 
-//! beta feature (limit zoom not added yet :P)
+
+//! beta feature (now it just needs to scale from the center not the top left :P)
 function scaleHandler(event) {
   cameraZoom = 1;
-  cameraZoom += event.deltaY * SCROLL_SENSITIVITY;
-  cameraZoom = Math.min(cameraZoom, MAX_ZOOM);
-  cameraZoom = Math.max(cameraZoom, MIN_ZOOM);
-  ctx.scale(cameraZoom, cameraZoom);
-  // ctx.translate(-window.innerWidth / 2 + cameraOffset.x, -window.innerHeight / 2 + cameraOffset.y);
-  // console.log(cameraZoom);
+  cameraZoom -= event.deltaY * SCROLL_SENSITIVITY;
+  cameraZoom = Math.max(Math.min(cameraZoom, MAX_ZOOM), MIN_ZOOM);
+
+  canvasZoom *= cameraZoom;
+
+  if (canvasZoom > 5) {
+    console.log(`zoom over 5 ${canvasZoom}`);
+    canvasZoom = 5;
+  } else if (canvasZoom < 0.2) {
+    console.log(`zoom under 0.2 ${canvasZoom}`);
+    canvasZoom = 0.2;
+  } else {
+    view[0] *= cameraZoom;
+    view[3] *= cameraZoom;
+  }
+
 }
 
 
@@ -52,48 +72,31 @@ function scaleHandler(event) {
 async function loop(timestamp) {
   let progress = timestamp - lastRender;
   lastRender = timestamp;
-
   update(progress);
   draw();
-
   window.requestAnimationFrame(loop);
 }
 
 
 async function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(-100, -100, canvas.width, canvas.height);
+  ctxUI.clearRect(0,0,1920,1080);
+  // ctx.fillText(fps.toString() + ' fps', -player.getPosition().x + canvas.width * 0.5 - player.getSprite().width * 0.5, 42);
+  ctxUI.fillText(fps, 0, 42);
+  ctx.fillRect(10, 10, 10, 10);
   ctx.drawImage(player.getSprite(), player.getPosition().x, player.getPosition().y);
 
 }
 
 
 async function update(progress) {
-  let move = {
-    x: 0,
-    y: 0
-  }
-  //. Up is negative, down is positive (origin in topleft)
-  if (KeysPressed['w']) {
-    move.y = -player.speed;
-  } else if (KeysPressed['s']) {
-    move.y = player.speed;
-  }
+  fps = 1000 / progress;
+  fps = fps.toFixed(0).toString() + ' fps';
+  player.handleMove(KeysPressed, progress);
+  view[4] = -player.getPosition().x + canvas.width * 0.5 - player.getSprite().width * 0.5;
+  view[5] = -player.getPosition().y + canvas.height * 0.5 - player.getSprite().height * 0.5;
 
-  if (KeysPressed['d']) {
-    move.x = player.speed;
-  } else if (KeysPressed['a']) {
-    move.x = -player.speed;
-  }
-
-  if ((move.x) && (move.x == move.y || -move.x == move.y)) {
-    move.x = player.diagSpeed * Math.sign(move.x);
-    move.y = player.diagSpeed * Math.sign(move.y);
-  }
-  move.x *= progress;
-  move.y *= progress;
-
-  player.move(move);
-
+  ctx.setTransform(view[0], view[1], view[2], view[3], view[4], view[5]);
 
 
 }
