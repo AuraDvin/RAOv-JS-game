@@ -1,10 +1,12 @@
+import { KeysPressed } from './inputHandler.js';
+
 export class Player {
-  #sprite
-  #health
-  #name
-  #position
-  speed
-  diagSpeed
+  #sprite = new Image();
+  #health = Number();
+  #name = String();
+  #position = { x: Number(), y: Number() };
+  speed = Number();
+  diagSpeed = Number();
 
   constructor(img = String, name = String) {
     this.#name = name;
@@ -12,10 +14,8 @@ export class Player {
     this.#sprite = new Image(256, 256);
     this.#sprite.src = img;
     this.#position = { x: Math.floor(1920 / 2 - (this.#sprite.width / 2)), y: Math.floor(1080 / 2 - (this.#sprite.height / 2)) };
-
     this.speed = 2;
-    // This just makes it so we move diagonally at this.speed
-    this.diagSpeed = Math.floor(this.speed * Math.sqrt(1 / 2));
+    this.diagSpeed = Math.floor(this.speed * Math.sqrt(0.5)); // This just makes it so we move diagonally at this.speed
   }
 
   // The bounds are going to change depending on the level size (not decided yet)
@@ -26,7 +26,7 @@ export class Player {
     this.#position.y = Math.min(Math.max(this.#position.y, 0), limitY - this.#sprite.height);
   }
 
-  handleMove(KeysPressed = Object, progress = Number) {
+  update(progress = Number) {
     let move = {
       x: 0,
       y: 0
@@ -53,6 +53,11 @@ export class Player {
 
     this.move(move);
 
+    // check collision
+
+    // check health
+
+    // other stuff...
   }
 
   getSprite() {
