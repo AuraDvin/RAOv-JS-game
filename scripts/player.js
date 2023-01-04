@@ -1,4 +1,5 @@
 import { KeysPressed } from './inputHandler.js';
+import { update_health } from './ui.js';
 
 export class Player {
   #sprite = new Image();
@@ -20,8 +21,8 @@ export class Player {
 
   // The bounds are going to change depending on the level size (not decided yet)
   #checkInBounds() {
-    let limitX = 1920;
-    let limitY = 1080;
+    let limitX = 1920 * 4;
+    let limitY = 1080 * 4;
     this.#position.x = Math.min(Math.max(this.#position.x, 0), limitX - this.#sprite.width);
     this.#position.y = Math.min(Math.max(this.#position.y, 0), limitY - this.#sprite.height);
   }
@@ -53,6 +54,11 @@ export class Player {
 
     this.move(move);
 
+
+
+    if (KeysPressed['t']) {
+      this.takeDamage({ damage: 10 });
+    }
     // check collision
 
     // check health
@@ -80,11 +86,14 @@ export class Player {
   //   console.log("You died");
   // }
 
-  // takeDamage(source) {
-  //   this.#health -= source.damage;
-  //   if (this.#health < 0)
-  //     this.die();
-  // }
+  takeDamage(source) {
+    console.log(this.#health);
+    this.#health -= source.damage;
+    if (this.#health < 0)
+      // this.die();
+      console.log('died');
+    update_health(this.#health);
+  }
 
   // getName() {
   //   return this.#name;

@@ -4,7 +4,7 @@ let ui_canvas;
 let ui_ctx;
 let fps = 1;
 let timeElapsed = 0;
-
+let health = 100
 
 export function ui_setup() {
   ui_canvas = document.getElementById('ui');
@@ -15,17 +15,24 @@ export function ui_setup() {
   ui_ctx.font = '42px Sans-serif';
 }
 
+export function update_health(newHealth) {
+  health = newHealth;
+}
+
 export function ui_update(progress) {
   timeElapsed += progress;
+
   // FPS only updates every second rather than every frame :D
   if (timeElapsed >= 1000) {
     fps = Math.floor(1000 / progress).toString() + ' fps';
     timeElapsed = 0;
   }
 
+  // health = 'Health ' + health.toString();
 }
 
 export function ui_draw() {
   ui_ctx.clearRect(0, 0, ui_canvas.width, ui_canvas.height);
   ui_ctx.fillText(fps, 0, 42);
+  ui_ctx.fillText(health, 0, 84);
 }

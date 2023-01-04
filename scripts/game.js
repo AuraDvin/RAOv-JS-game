@@ -2,6 +2,7 @@ import { Player } from './player.js';
 import { KeysHandler, mouseHandler } from './inputHandler.js';
 import { ui_setup, ui_update, ui_draw } from './ui.js';
 import { scaleHandler } from './zoomHandle.js';
+import { bg_draw, bg_setup, bg_update } from './bg.js';
 
 export let view = [1, 0, 0, 1, 0, 0];  // Matrix representing the view. (scale, 0, 0, scale, widthNew, HeightNew)
 
@@ -27,6 +28,8 @@ addEventListener('DOMContentLoaded', () => {
   ctx = canvas.getContext('2d');
 
   ui_setup();
+  bg_setup();
+  bg_draw();
 
   addEventListener('wheel', scaleHandler, false);
   addEventListener('keydown', KeysHandler, false);
@@ -48,16 +51,16 @@ async function loop(timestamp) {
 }
 
 async function draw() {
+  bg_draw();
   ctx.clearRect(-100, -100, canvas.width, canvas.height);
   ui_draw();
   ctx.fillRect(10, 10, 10, 10);
   ctx.drawImage(player.getSprite(), player.getPosition().x, player.getPosition().y);
-
 }
 
 async function update(progress) {
   player.update(progress);
-
+  bg_update(progress, player.getPosition());
   view[4] = -player.getPosition().x + canvas.width * 0.5 - player.getSprite().width * 0.5;
   view[5] = -player.getPosition().y + canvas.height * 0.5 - player.getSprite().height * 0.5;
 
