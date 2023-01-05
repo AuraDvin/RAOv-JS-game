@@ -6,7 +6,6 @@ import { bg_draw, bg_setup, bg_update } from './bg.js';
 
 export let view = [1, 0, 0, 1, 0, 0];  // Matrix representing the view. (scale, 0, 0, scale, widthNew, HeightNew)
 
-// let cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 /**@type {Player} */
 let player;
 /** @type {HTMLCanvasElement} */
@@ -15,23 +14,28 @@ let canvas;
 let ctx;
 let isRunning = true;
 let lastRender = 0;
-let assets = "../assets/";
+let assets = "/assets/";
+export let backgroundImage = new Image(1920, 1080);
+let backgroundPatrn;
 
 
 addEventListener('DOMContentLoaded', () => {
-  player = new Player(assets + 'player.png', 'Bingus Janez');
+  const user = localStorage.getItem('username');
+  if (!user)  player = new Player(assets + 'player.png', 'I decided not to input my name');
+  else player = new Player(assets + 'player.png', user);
   canvas = document.getElementById("player");
   canvas.focus();
   canvas.width = 1920;
   canvas.height = 1080;
-
+  
   ctx = canvas.getContext('2d');
 
-  ui_setup();
-  bg_setup();
-  bg_draw();
+  backgroundImage.src = '/assets/alphaBackground.png';
+  backgroundImage.onload = () =>{ backgroundPatrn = ctx.createPattern(backgroundImage, 'repeat'); }; // fixes the black background
 
-  addEventListener('wheel', scaleHandler, false);
+  ui_setup();
+
+  // addEventListener('wheel', scaleHandler, false); //removed because i couldn't figure it out 😔
   addEventListener('keydown', KeysHandler, false);
   addEventListener('keyup', KeysHandler, false);
   addEventListener('auxclick', mouseHandler, false);
@@ -44,23 +48,25 @@ addEventListener('DOMContentLoaded', () => {
 async function loop(timestamp) {
   let progress = timestamp - lastRender;
   lastRender = timestamp;
+
   update(progress);
   ui_update(progress);
+  
   draw();
   window.requestAnimationFrame(loop);
 }
 
 async function draw() {
-  bg_draw();
-  ctx.clearRect(-100, -100, canvas.width, canvas.height);
+  ctx.clearRect(-100, -100, canvas.width + player.getPosition().x, canvas.height + player.getPosition().y);
+  ctx.fillStyle = backgroundPatrn;
+  ctx.fillRect(0, 0, 7680, 4320);
+  player.draw(ctx);
+  
   ui_draw();
-  ctx.fillRect(10, 10, 10, 10);
-  ctx.drawImage(player.getSprite(), player.getPosition().x, player.getPosition().y);
 }
 
 async function update(progress) {
   player.update(progress);
-  bg_update(progress, player.getPosition());
   view[4] = -player.getPosition().x + canvas.width * 0.5 - player.getSprite().width * 0.5;
   view[5] = -player.getPosition().y + canvas.height * 0.5 - player.getSprite().height * 0.5;
 

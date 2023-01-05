@@ -2,7 +2,7 @@
 let bg_canvas;
 /** @type {CanvasRenderingContext2D} */
 let bg_ctx;
-let bg_Image = new Image(1920, 1080);
+let bg_Image = new Image(1920 * 4, 1080 * 4);
 
 export async function bg_setup() {
   bg_canvas = document.getElementById('background');
@@ -15,11 +15,11 @@ export async function bg_setup() {
 }
 
 export function bg_update(progress, playerLoc) {
-  bg_ctx.save();
+  bg_ctx.restore();
   
   bg_ctx.translate(-playerLoc.x, -playerLoc.y);
-
-  bg_ctx.restore();
+  
+  bg_ctx.save();
 }
 
 export function bg_draw() {

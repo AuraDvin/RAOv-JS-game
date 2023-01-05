@@ -8,6 +8,5 @@ export async function KeysHandler(event) {
 export async function mouseHandler(event) {
     if (event.button === 1) {
         resetZoom();
-        console.log("middle mouse button");
     }
 }

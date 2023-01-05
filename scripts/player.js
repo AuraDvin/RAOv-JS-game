@@ -1,11 +1,16 @@
 import { KeysPressed } from './inputHandler.js';
 import { update_health } from './ui.js';
+let limit = {
+  x: 7680,
+  y: 4320
+};
 
 export class Player {
   #sprite = new Image();
   #health = Number();
   #name = String();
   #position = { x: Number(), y: Number() };
+  #immunityFrames = 300;
   speed = Number();
   diagSpeed = Number();
 
@@ -21,10 +26,18 @@ export class Player {
 
   // The bounds are going to change depending on the level size (not decided yet)
   #checkInBounds() {
-    let limitX = 1920 * 4;
-    let limitY = 1080 * 4;
-    this.#position.x = Math.min(Math.max(this.#position.x, 0), limitX - this.#sprite.width);
-    this.#position.y = Math.min(Math.max(this.#position.y, 0), limitY - this.#sprite.height);
+    this.#position.x = Math.min(Math.max(this.#position.x, 0), limit.x - this.#sprite.width);
+    this.#position.y = Math.min(Math.max(this.#position.y, 0), limit.y - this.#sprite.height);
+  }
+
+  #checkDamage(progress, source) {
+    this.#immunityFrames -= progress;
+    if (this.#immunityFrames <= 0) {
+      this.#immunityFrames = 300;
+      this.takeDamage(source);
+      return true;
+    }
+    return false;
   }
 
   update(progress = Number) {
@@ -57,13 +70,9 @@ export class Player {
 
 
     if (KeysPressed['t']) {
-      this.takeDamage({ damage: 10 });
+      // this.#checkDamage(progress, { damage: 10 });
     }
-    // check collision
 
-    // check health
-
-    // other stuff...
   }
 
   getSprite() {
@@ -81,21 +90,31 @@ export class Player {
     this.#checkInBounds();
   }
 
-  // comment the not needed code for now
-  // die() {
-  //   console.log("You died");
-  // }
+  // Just takes you to the first site
+  die() {
+    alert('You have died');
+    window.location.replace('/index.html');
+  }
 
   takeDamage(source) {
     console.log(this.#health);
     this.#health -= source.damage;
     if (this.#health < 0)
-      // this.die();
-      console.log('died');
+      this.die();
+    console.log('died');
     update_health(this.#health);
   }
 
-  // getName() {
-  //   return this.#name;
-  // }
+  draw(ctx) {
+    ctx.fillStyle = 'Salmon';
+    ctx.beginPath();
+    ctx.arc(this.#position.x + this.#sprite.width * 0.5, this.#position.y + this.#sprite.height * 0.5, this.#sprite.width * 0.5, 0, 2 * Math.PI);
+    ctx.fill();
+
+    ctx.drawImage(this.#sprite, this.#position.x, this.#position.y);
+
+    ctx.fillStyle = 'Black';
+    ctx.fillText(this.#name, this.#position.x + this.#sprite.width * 0.5 - ctx.measureText(this.#name).width * 0.5, this.#position.y + 100);
+    ctx.font = '30px Tahoma';
+  }
 }
