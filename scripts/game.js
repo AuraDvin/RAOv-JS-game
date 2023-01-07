@@ -14,15 +14,17 @@ let canvas;
 let ctx;
 let isRunning = true;
 let lastRender = 0;
-let assets = "/assets/";
+let assets = "./assets/";
 export let backgroundImage = new Image(1920, 1080);
 let backgroundPatrn;
 
 
 addEventListener('DOMContentLoaded', () => {
-  const user = localStorage.getItem('username');
-  if (!user)  player = new Player(assets + 'player.png', 'I decided not to input my name');
-  else player = new Player(assets + 'player.png', user);
+  // {
+    const user = localStorage.getItem('username');
+    const color = localStorage.getItem('color');
+    player = new Player(assets + 'player.png', user,  color);
+  // }
   canvas = document.getElementById("player");
   canvas.focus();
   canvas.width = 1920;
@@ -30,7 +32,7 @@ addEventListener('DOMContentLoaded', () => {
   
   ctx = canvas.getContext('2d');
 
-  backgroundImage.src = '/assets/alphaBackground.png';
+  backgroundImage.src = assets + '/alphaBackground.png';
   backgroundImage.onload = () =>{ backgroundPatrn = ctx.createPattern(backgroundImage, 'repeat'); }; // fixes the black background
 
   ui_setup();

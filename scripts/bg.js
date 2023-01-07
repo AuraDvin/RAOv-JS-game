@@ -10,7 +10,7 @@ export async function bg_setup() {
   bg_canvas.height = 1080;
 
   bg_ctx = bg_canvas.getContext('2d');
-  bg_Image.src = "../assets/alphaBackground.png";
+  bg_Image.src = "./assets/alphaBackground.png";
 
 }
 

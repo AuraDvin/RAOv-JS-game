@@ -11,10 +11,11 @@ export class Player {
   #name = String();
   #position = { x: Number(), y: Number() };
   #immunityFrames = 300;
+  #color = String();
   speed = Number();
   diagSpeed = Number();
 
-  constructor(img = String, name = String) {
+  constructor(img = String, name = String, color = String) {
     this.#name = name;
     this.#health = 100;
     this.#sprite = new Image(256, 256);
@@ -22,6 +23,8 @@ export class Player {
     this.#position = { x: Math.floor(1920 / 2 - (this.#sprite.width / 2)), y: Math.floor(1080 / 2 - (this.#sprite.height / 2)) };
     this.speed = 2;
     this.diagSpeed = Math.floor(this.speed * Math.sqrt(0.5)); // This just makes it so we move diagonally at this.speed
+    this.#color = 'salmon';
+    console.log(this);
   }
 
   // The bounds are going to change depending on the level size (not decided yet)
@@ -46,15 +49,15 @@ export class Player {
       y: 0
     }
     //. Up is negative, down is positive (origin in topleft)
-    if (KeysPressed['w']) {
+    if (KeysPressed['w'] || KeysPressed['arrowup']) {
       move.y = -this.speed;
-    } else if (KeysPressed['s']) {
+    } else if (KeysPressed['s'] || KeysPressed['arrowdown']) {
       move.y = this.speed;
     }
 
-    if (KeysPressed['d']) {
+    if (KeysPressed['d'] || KeysPressed['arrowright']) {
       move.x = this.speed;
-    } else if (KeysPressed['a']) {
+    } else if (KeysPressed['a'] || KeysPressed['arrowleft']) {
       move.x = -this.speed;
     }
 
@@ -106,7 +109,7 @@ export class Player {
   }
 
   draw(ctx) {
-    ctx.fillStyle = 'Salmon';
+    ctx.fillStyle = this.#color;
     ctx.beginPath();
     ctx.arc(this.#position.x + this.#sprite.width * 0.5, this.#position.y + this.#sprite.height * 0.5, this.#sprite.width * 0.5, 0, 2 * Math.PI);
     ctx.fill();

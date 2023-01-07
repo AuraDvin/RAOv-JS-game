@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="This document allows you to start the game and set your username">
-    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
     <title>Document</title>
     <style>
         html,
@@ -39,6 +39,10 @@
                 });
             }
 
+            getSelectedItem() {
+                for (var i = 0; i < this.options.length && !this.options[i].checked; i++);
+                return i;
+            }
             selectDown() {
                 for (let i = 0; i < this.options.length; i++) {
                     if (this.options[i].checked) {
@@ -65,8 +69,8 @@
                     }
                 }
             }
-            move(up = Boolean){
-                if (up){
+            move(up = Boolean) {
+                if (up) {
                     for (let i = this.options.length - 1; i >= 0; i--) {
                         if (this.options[i].checked) {
                             this.options[i].checked = false;
@@ -93,13 +97,19 @@
             }
 
             updateMenu(timestamp) {
-                if ((pressedKeys['arrowup'] || pressedKeys['w'])  && !this.#moved) {
+                if (username.length != 0) {
+                    this.options[0].string = username;
+                } else {
+                    this.options[0].string = 'Type here!';
+                }
+
+                if ((pressedKeys['arrowup']) && !this.#moved) {
                     this.#moved = true;
                     this.#timestamp = timestamp;
                     menu.selectUp();
                     return;
                 }
-                if ((pressedKeys['arrowdown'] || pressedKeys['s'])  && !this.#moved) {
+                if ((pressedKeys['arrowdown']) && !this.#moved) {
                     this.#moved = true;
                     this.#timestamp = timestamp;
                     menu.selectDown();
@@ -109,20 +119,24 @@
                     this.#moved = false;
                     return;
                 }
-                if (pressedKeys['enter']){
+                if (pressedKeys['enter']) {
                     this.options.forEach(e => {
-                        if (e.checked){
-                            if (e.string.toLowerCase() == 'start'){
-                                const user = prompt('Enter a username!');
-                                localStorage.setItem('username', user);
-                                window.location.replace('/game.html');
-                            }
-                            if (e.string.toLowerCase() == 'options'){
-                                console.log('options');
-                                window.location.replace('https://www.google.si/');
+                        if (e.checked) {
+                            switch (e.place) {
+                                case 0: // username thing
+                                    localStorage.setItem('username', username);
+                                    break;
+                                case 1: // start
+                                    localStorage.setItem('username', username);
+                                    window.location.replace('./game.html');
+                                    break;
+                                case 2: // options
+                                    console.log('options');
+                                    window.location.replace('https://www.google.si/');
+                                    break;
                             }
                         }
-                        
+
                     });
                 }
             }
@@ -133,49 +147,102 @@
         /** @type {CanvasRenderingContext2D} */
         const ctx = canvas.getContext('2d');
 
-        let menu = new Menu(['Start', 'Options'/*, 'Test', 'Aha', 'Uhu'*/]); // Works with more than two ! 
+        let menu = new Menu(['User', 'Start', 'Options']);
+        let username = "";
         let pressedKeys = {};
         let lastFrame = 0;
+        // let updates = 0;
 
         addEventListener('keyup', handleKey, false);
         addEventListener('keydown', handleKey, false);
 
-        window.requestAnimationFrame(update);
+        // <!--! THIS UPDATES THE WHOLE THING -->
+
+        let updateId = setInterval(window.requestAnimationFrame, 16, update);
 
         function handleKey(event) {
             pressedKeys[event.key.toLowerCase()] = event.type == 'keydown';
-            // console.log(pressedKeys);
+            const key = event.key.toLowerCase();
+
+            if (menu.getSelectedItem() === 0 && pressedKeys[key.toLowerCase()]) { // is entering username
+                if (
+                    (key.length == 1) && (
+                        (key >= 'a' && key <= 'z') || // a letter
+                        (key >= '0' && key <= '9') || // a number
+                        ([' ', '-', '_'].includes(key)) //  _   -
+                    ) || (
+                        key == 'backspace'
+                    )
+                ) {
+                    handleUsername(key);
+                    updateUsername();
+                }
+            }
         }
 
+        function handleUsername(key) {
+            if (key != 'backspace' && username.length > 12) {
+                // console.log("it's too large D:");
+                return;
+            }
+            if (key == 'backspace') {
+                username = username.substring(0, username.length - 1);
+                // console.log(username);
+                return;
+            }
+            username += key;
+            // console.log(username);
+            return;
 
+        }
 
-// <!--. Actual important code
+        function updateUsername() { 
+            if (username.length > 0)
+                localStorage.setItem('username', username);
+            else 
+            localStorage.setItem('username', 'no username');
+        }
 
-
-
+        // <!--. Actual important code
 
         function update(timestamp) {
+            // updates += 1000;
             let progress = timestamp - lastFrame;
             lastFrame = timestamp;
+            // console.log('ups ', Math.floor(updates/timestamp));
             menu.updateMenu(timestamp);
             draw();
-            window.requestAnimationFrame(update);
         }
 
         function draw() {
             ctx.fillStyle = 'white';
             ctx.font = '30px Arial';
+
+            const windowWidth = window.innerWidth * 0.5;
+            const start = 120;
+            const usernameWidth = ctx.measureText(menu.options[0].string).width;
+        
             ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+            
             menu.options.forEach(e => {
+                
+                ctx.fillText(e.string, windowWidth, start + 10 + e.place * 32);
+
                 if (e.checked) {
                     ctx.lineWidth = 6;
                     ctx.strokeStyle = '#F2F2F2';
+                    
                     ctx.beginPath();
-                    ctx.moveTo(window.innerWidth * 0.5 - 10, 120 + e.place * 32);
-                    ctx.lineTo(window.innerWidth * 0.5 - 20, 120 + e.place * 32);
+                    ctx.moveTo(windowWidth - 10, start + e.place * 32);
+                    ctx.lineTo(windowWidth - 20, start + e.place * 32);
                     ctx.stroke();
+                    
                 }
-                ctx.fillText(e.string, window.innerWidth * 0.5 , 130 + e.place * 32);
+
+                if (e.place == 0) {
+                    ctx.fillRect(windowWidth , start + 14 , usernameWidth, 2);
+                }
+
             });
         }
 
