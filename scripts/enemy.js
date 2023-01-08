@@ -1,22 +1,38 @@
 const enemyTypes = ['fast', 'strong', 'ranged']
 
-export class Enemy {
+class Enemy {
   #sprite;
   #speed = Number;
-  #type = String;
+  #diagSpeed = Number;
+  goToPosition = { x: Number, y: Number };
   #position = { x: Number, y: Number };
 
   constructor(type, spawnPosition) {
-    if (type >= 0 && type <= 2) {
-      this.#type = enemyTypes[type];
-    } else {
-      this.#type = 'fast';
-    }
     this.#sprite = new Image(256, 256);
-    this.#sprite.src = 'bla bla';
+    switch (type) {
+      case 0:
+        this.#speed = 2.1;
+
+        break;
+      case 1:
+
+        break;
+      case 2:
+
+        break;
+    }
+    this.#diagSpeed = this.#speed * Math.sqrt(2);
+    this.#sprite.src = './assets/enemy-' + type.toString() + 'png';
     this.#position = spawnPosition;
   }
 
+  #findIntervalId = setInterval(this.findPlayer, 20, { x: 10, y: 10 });
+
+  findPlayer({ x: Number, y: Number }) {
+    const deltaX = x - this.#position.x;
+    const deltaY = y - this.#position.y;
+    goToPosition = { x: deltaX, y: deltaY };
+  }
 
   die() {
     console.log("enemy defeated");
@@ -43,35 +59,38 @@ export class Enemy {
 let mobs = [];
 
 export function spawnMobs(ctx) {
-  let type = Math.floor(Math.random() * 2);
-  let spawnPosition = {
-    x: ~~Math.random() * 1920,
-    y: ~~Math.random() * 1080
+  const type = Math.floor(Math.random() * 2);
+
+  const spawnPosition = {
+    x: Math.floor(Math.random() * 1920),
+    y: Math.floor(Math.random() * 1080)
   };
-  const newMob = new Enemy(type, spawnPosition);
+
+  let newMob = new Enemy(type, spawnPosition);
 
   mobs.push(newMob);
-
 }
 
-export function updateMobs(progress){
-  mobs.forEach((e, i)=>{
-    mobs[i].move(/* to player ig */);
+export function updateMobs(progress) {
+  mobs.forEach((e, i) => {
+    // mobs[i].findPlayer();
+    const x = mobs[i].goToPosition.x;
+    const y = mobs[i].goToPosition.y;
+    mobs[i].move({ x: x * progress, y: y * progress });
   });
 }
 
 export function drawMobs(ctx) {
-  mobs.forEach((e, i)=>{
+  mobs.forEach((e, i) => {
     ctx.drawImage(mobs[i].getSprite(), mobs[i].getPosition().x, mobs[i].getPosition().y);
   });
 }
 
 
-
 function removeFromList(defeatedEnemy) {
-  mobs.forEach((e, i)=>{
-    if (e == defeatedEnemy){
-      delete(mobs[i]); // removes enemy from list entirely
+  mobs.forEach((e, i) => {
+    if (e == defeatedEnemy) {
+      delete (mobs[i]); // removes enemy from list entirely
     }
   })
 }

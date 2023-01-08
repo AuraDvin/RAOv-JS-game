@@ -24,7 +24,7 @@ export class Player {
     this.speed = 2;
     this.diagSpeed = Math.floor(this.speed * Math.sqrt(0.5)); // This just makes it so we move diagonally at this.speed
     this.#color = 'salmon';
-    console.log(this);
+    // console.log(this);
   }
 
   // The bounds are going to change depending on the level size (not decided yet)

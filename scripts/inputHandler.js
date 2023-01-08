@@ -1,8 +1,14 @@
+import { changePause } from "./game.js";
 import { resetZoom } from "./zoomHandle.js";
 export let KeysPressed = {};
 
 export async function KeysHandler(event) { 
-    KeysPressed[event.key.toLowerCase()] = event.type === 'keydown';
+    const key = event.key.toLowerCase();
+    KeysPressed[key] = event.type === 'keydown';
+    // console.log(key);
+    if (KeysPressed[key] && key == 'escape'){
+        changePause();
+    }
 }
 
 export async function mouseHandler(event) {
