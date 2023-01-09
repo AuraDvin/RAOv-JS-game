@@ -8,119 +8,54 @@
     <meta name="description" content="A menu screen of a game running in canvas tag of HTML5">
     <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
     <title>Menu Screen</title>
+    <link rel="stylesheet" href="./styles/body.css">
+    <link rel="stylesheet" href="./styles/canvas.css">
     <style>
-        html,
         body {
-            margin: 0;
-            padding: 0;
             background-color: #2f2f2f;
-            overflow: hidden;
         }
-    </style>
+        </style>
+
 </head>
+<audio src="#"></audio>
 
 <body>
     <canvas id="myCanvas" width="1920" height="1080"></canvas>
-    <script>
-        class Menu {
-            options = [];
-            #timestamp = 0;
-            #moved = false;
-            //<!--? menu is dynamic and works with multiple options. but it doen't check for overflow D:
-            constructor(options = []) {
-                let i = 0;
-                options.forEach(e => {
-                    this.options.push({
-                        string: e,
-                        checked: i == 0,
-                        place: i
-                    });
-                    i++;
-                });
-            }
+    <script type='module' defer>
+        import { Menu } from './scripts/Menu.js';
+        
+        const canvas = document.getElementById('myCanvas');
+        /** @type {CanvasRenderingContext2D} */
+        const ctx = canvas.getContext('2d');
+        const font = '42px sans-serif';
+        ctx.font = font;
 
-            getSelectedItem() {
-                for (var i = 0; i < this.options.length && !this.options[i].checked; i++);
-                return i;
-            }
-            selectDown() {
-                for (let i = 0; i < this.options.length; i++) {
-                    if (this.options[i].checked) {
-                        this.options[i].checked = false;
-                        if (i + 1 >= this.options.length) {
-                            this.options[0].checked = true;
-                            return;
-                        }
-                        this.options[i + 1].checked = true;
-                        return;
-                    }
-                }
-            }
-            selectUp() {
-                for (let i = this.options.length - 1; i >= 0; i--) {
-                    if (this.options[i].checked) {
-                        this.options[i].checked = false;
-                        if (i - 1 < 0) {
-                            this.options[this.options.length - 1].checked = true;
-                            return;
-                        }
-                        this.options[i - 1].checked = true;
-                        return;
-                    }
-                }
-            }
-            move(up = Boolean) {
-                if (up) {
-                    for (let i = this.options.length - 1; i >= 0; i--) {
-                        if (this.options[i].checked) {
-                            this.options[i].checked = false;
-                            if (i - 1 < 0) {
-                                this.options[this.options.length - 1].checked = true;
-                                return;
-                            }
-                            this.options[i - 1].checked = true;
-                            return;
-                        }
-                    }
-                }
-                for (let i = 0; i < this.options.length; i++) {
-                    if (this.options[i].checked) {
-                        this.options[i].checked = false;
-                        if (i + 1 >= this.options.length) {
-                            this.options[0].checked = true;
-                            return;
-                        }
-                        this.options[i + 1].checked = true;
-                        return;
-                    }
-                }
-            }
-
-            updateMenu(timestamp) {
+        let menu = new Menu(['User', 'Start', 'Options']);
+        function updateMenu(timestamp) {
                 if (username.length != 0) {
-                    this.options[0].string = username;
+                    menu.options[0].string = username;
                 } else {
-                    this.options[0].string = 'Type here!';
+                    menu.options[0].string = 'Type here!';
                 }
 
-                if ((pressedKeys['arrowup']) && !this.#moved) {
-                    this.#moved = true;
-                    this.#timestamp = timestamp;
+                if ((pressedKeys['arrowup']) && !menu.moved) {
+                    menu.moved = true;
+                    menu.timestamp = timestamp;
                     menu.selectUp();
                     return;
                 }
-                if ((pressedKeys['arrowdown']) && !this.#moved) {
-                    this.#moved = true;
-                    this.#timestamp = timestamp;
+                if ((pressedKeys['arrowdown']) && !menu.moved) {
+                    menu.moved = true;
+                    menu.timestamp = timestamp;
                     menu.selectDown();
                     return;
                 }
-                if (this.#moved && timestamp - this.#timestamp >= 100) {
-                    this.#moved = false;
+                if (menu.moved && timestamp - menu.timestamp >= 100) {
+                    menu.moved = false;
                     return;
                 }
                 if (pressedKeys['enter']) {
-                    this.options.forEach(e => {
+                    menu.options.forEach(e => {
                         if (e.checked) {
                             switch (e.place) {
                                 case 0: // username thing
@@ -131,8 +66,8 @@
                                     window.location.replace('./game.html');
                                     break;
                                 case 2: // options
-                                    console.log('options');
-                                    window.location.replace('https://www.google.si/');
+                                    // console.log('options');
+                                    window.location.replace('./settings.html');
                                     break;
                             }
                         }
@@ -140,26 +75,35 @@
                     });
                 }
             }
-
-        };
-        localStorage.setItem('fpsLock', '16');
-        localStorage.setItem('color', 'salmon');
-        const canvas = document.getElementById('myCanvas');
-        /** @type {CanvasRenderingContext2D} */
-        const ctx = canvas.getContext('2d');
-
-        let menu = new Menu(['User', 'Start', 'Options']);
         let username = "";
         let pressedKeys = {};
         let lastFrame = 0;
-        // let updates = 0;
+        document.body.onload = () => {
+            console.log('loaded');
+            if (!typeof localStorage.getItem('up') !== 'undefined') {
+                localStorage.setItem('up', 'arrowup|w');
+                localStorage.setItem('down', 'arrowdown|s');
+                localStorage.setItem('left', 'arrowleft|a');
+                localStorage.setItem('right', 'arrowright|d');
+            }
+            if (!typeof localStorage.getItem('color') !== 'undefined') {
+                localStorage.setItem('color', 'salmon');
+            }
+            if (!typeof localStorage.getItem('volume') !== 'undefined') {
+                localStorage.setItem('volume', '100');
+            }
+
+            username = localStorage.getItem('username') ? localStorage.getItem('username') : '';
+            console.log(username);
+            
+        }
 
         addEventListener('keyup', handleKey, false);
         addEventListener('keydown', handleKey, false);
 
-        // <!--! THIS UPDATES THE WHOLE THING -->
+        // <!--! menu UPDATES THE WHOLE THING -->
 
-        let updateId = setInterval(window.requestAnimationFrame, 16, update);
+        let updateId = setInterval(window.requestAnimationFrame, 32, update);
 
         function handleKey(event) {
             pressedKeys[event.key.toLowerCase()] = event.type == 'keydown';
@@ -197,11 +141,11 @@
 
         }
 
-        function updateUsername() { 
+        function updateUsername() {
             if (username.length > 0)
                 localStorage.setItem('username', username);
-            else 
-            localStorage.setItem('username', 'no username');
+            else
+                localStorage.setItem('username', 'no username');
         }
 
         // <!--. Actual important code
@@ -211,37 +155,37 @@
             let progress = timestamp - lastFrame;
             lastFrame = timestamp;
             // console.log('ups ', Math.floor(updates/timestamp));
-            menu.updateMenu(timestamp);
+            updateMenu(timestamp);
             draw();
         }
 
         function draw() {
             ctx.fillStyle = 'white';
-            ctx.font = '30px Arial';
+            // ctx.font = '30px Arial';
 
-            const windowWidth = window.innerWidth * 0.5;
+            const windowWidth = 1920 * 0.5;
             const start = 120;
             const usernameWidth = ctx.measureText(menu.options[0].string).width;
-        
+
             ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-            
+
             menu.options.forEach(e => {
-                
-                ctx.fillText(e.string, windowWidth, start + 10 + e.place * 32);
+
+                ctx.fillText(e.string, windowWidth, start + 10 + e.place * 42);
 
                 if (e.checked) {
                     ctx.lineWidth = 6;
                     ctx.strokeStyle = '#F2F2F2';
-                    
+
                     ctx.beginPath();
-                    ctx.moveTo(windowWidth - 10, start + e.place * 32);
-                    ctx.lineTo(windowWidth - 20, start + e.place * 32);
+                    ctx.moveTo(windowWidth - 10, start + e.place * 42);
+                    ctx.lineTo(windowWidth - 20, start + e.place * 42);
                     ctx.stroke();
-                    
+
                 }
 
                 if (e.place == 0) {
-                    ctx.fillRect(windowWidth , start + 14 , usernameWidth, 2);
+                    ctx.fillRect(windowWidth, start + 14, usernameWidth, 2);
                 }
 
             });

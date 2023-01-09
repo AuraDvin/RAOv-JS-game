@@ -17,14 +17,15 @@ export async function bg_setup() {
   bg_canvas.height = 1080;
 
   bg_ctx = bg_canvas.getContext('2d'/*, { alpha: false }*/);
-  bg_Image.src = "../assets/alphaBackground.png";
-  bg_Image.onload = () => {
-    // console.log('ready');
-    backgroundPatrn = bg_ctx.createPattern(bg_Image, 'repeat');
-    // console.log(backgroundPatrn);
-    bg_ctx.fillStyle = backgroundPatrn;
-  };
+  // bg_Image.src = "../assets/alphaBackground.png";
+  // bg_Image.onload = () => {
+  //   // console.log('ready');
+  //   backgroundPatrn = bg_ctx.createPattern(bg_Image, 'repeat');
+  //   // console.log(backgroundPatrn);
+  //   bg_ctx.fillStyle = backgroundPatrn;
+  // };
   // console.log(bg_Image);
+  bg_ctx.fillStyle = 'green';
 }
 
 export function bg_update(progress) {

@@ -5,7 +5,6 @@ export let KeysPressed = {};
 export async function KeysHandler(event) { 
     const key = event.key.toLowerCase();
     KeysPressed[key] = event.type === 'keydown';
-    // console.log(key);
     if (KeysPressed[key] && key == 'escape'){
         changePause();
     }
