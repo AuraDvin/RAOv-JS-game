@@ -1,10 +1,16 @@
-const enemyTypes = ['fast', 'strong', 'ranged']
+import { player } from "./game.js";
+
+const enemyTypes = ['fast', 'strong'/*, 'ranged'*/];
+
 
 class Enemy {
+  #health = 100;
   #sprite;
   #speed = Number;
   #diagSpeed = Number;
+  damage = Number;
   goToPosition = { x: Number, y: Number };
+  direction = { x: Number, y: Number };
   #position = { x: Number, y: Number };
 
   constructor(type, spawnPosition) {
@@ -15,25 +21,51 @@ class Enemy {
 
         break;
       case 1:
-
+        this.#speed = 1.5;
         break;
       case 2:
-
+        // scrapped idea
         break;
     }
     this.#diagSpeed = this.#speed * Math.sqrt(2);
-    this.#sprite.src = './assets/enemy-' + type.toString() + 'png';
+    this.#sprite.src = './assets/enemy' + type.toString() + '.png';
     this.#position = spawnPosition;
+    this.damage = 10;
+    // this.lookForPlayer = setInterval(function () {
+    //   this.goToPosition = { x: player.getPosition().x, y: player.getPosition().y };
+    //   // console.log(this.goToPosition);  
+    // }, 2000);
   }
 
-  #findIntervalId = setInterval(this.findPlayer, 20, { x: 10, y: 10 });
+  // test = setTimeout(() => { this.die(); }, 10000);
 
-  findPlayer({ x: Number, y: Number }) {
-    const deltaX = x - this.#position.x;
-    const deltaY = y - this.#position.y;
-    goToPosition = { x: deltaX, y: deltaY };
+  pathfind() {
+    const deltaX = player.getPosition().x - this.#position.x;
+    const deltaY = player.getPosition().y - this.#position.y;
+    const hipot = Math.hypot(deltaX, deltaY);
+    const delta = 10 * this.#speed / hipot;
+
+    // if (this.goToPosition) {
+    // if (this.goToPosition.x.isNaN) {
+    //   debugger;
+    //   this.goToPosition.y;
+    //   this.#position.x;
+    //   this.#position.y;
+    // }
+    // const deltaX = this.goToPosition.x - this.#position.x;
+    // const deltaY = this.goToPosition.y - this.#position.y;
+    // const hipot = Math.hypot(deltaX, deltaY);
+    // const delta = 10 * this.#speed / hipot;
+
+
+    // console.log({ deltaX, deltaY, hipot, delta });
+    this.direction.x = Math.floor(deltaX * delta);
+    this.direction.y = Math.floor(deltaY * delta);
+    // } else {
+    // console.log('sus');
+    // }
+    // console.log('direction', this.direction);
   }
-
   die() {
     console.log("enemy defeated");
     removeFromList(this);
@@ -45,25 +77,34 @@ class Enemy {
 
 
   getPosition() {
-    return { x: this.#sprite.x, y: this.#sprite.y };
+    return { x: this.#position.x, y: this.#position.y };
   }
-
+  #checkInBounds() {
+    this.#position.x = Math.min(Math.max(0, this.#position.x), 7680 - this.#sprite.width * 0.5);
+    this.#position.y = Math.min(Math.max(0, this.#position.y), 4320 - this.#sprite.height * 0.5);
+  }
   move(vector2) {
-    this.#sprite.x = vector2.x;
-    this.#sprite.y = vector2.y;
+    this.#position.x += vector2.x;
+    this.#position.y += vector2.y;
+    this.#checkInBounds();
   }
 
-
+  dealDamage(source) {
+    this.#health -= source.damage;
+    if (this.#health <= 0) {
+      this.die();
+    }
+  }
 }
 
 let mobs = [];
 
-export function spawnMobs(ctx) {
-  const type = Math.floor(Math.random() * 2);
-
+export function spawnMobs() {
+  const type = Math.floor(Math.random() * (enemyTypes.length - 1));
+  // debugger;
   const spawnPosition = {
-    x: Math.floor(Math.random() * 1920),
-    y: Math.floor(Math.random() * 1080)
+    x: Math.floor(Math.random() * 7680),
+    y: Math.floor(Math.random() * 4320)
   };
 
   let newMob = new Enemy(type, spawnPosition);
@@ -72,25 +113,37 @@ export function spawnMobs(ctx) {
 }
 
 export function updateMobs(progress) {
-  mobs.forEach((e, i) => {
-    // mobs[i].findPlayer();
-    const x = mobs[i].goToPosition.x;
-    const y = mobs[i].goToPosition.y;
-    mobs[i].move({ x: x * progress, y: y * progress });
-  });
+  progress /= 100;
+  for (let i in mobs) {
+    mobs[i].pathfind();
+    mobs[i].move({ x: mobs[i].direction.x * progress, y: mobs[i].direction.y * progress });
+    // console.log(mobs[i].getPosition());
+  }
+  if (mobs.length > 50) {                   // make sure to only have 20 at once 
+    while (mobs.length > 50) {
+      mobs.pop();
+    }
+  }
+
 }
 
 export function drawMobs(ctx) {
-  mobs.forEach((e, i) => {
+  // mobs.forEach((e, i) => {
+  //   ctx.drawImage(mobs[i].getSprite(), mobs[i].getPosition().x, mobs[i].getPosition().y);
+  // });
+  for (let i in mobs) {
     ctx.drawImage(mobs[i].getSprite(), mobs[i].getPosition().x, mobs[i].getPosition().y);
-  });
+    // console.log('drew', mobs[mob], 'at', mobs[mob].getPosition());
+  }
 }
 
 
 function removeFromList(defeatedEnemy) {
   mobs.forEach((e, i) => {
-    if (e == defeatedEnemy) {
+    if (e === defeatedEnemy) { // does this even work? wait what in this project does work.
+      // clearInterval(mobs[i].lookForPlayer); // stop calling funciton after it no exists
       delete (mobs[i]); // removes enemy from list entirely
+      console.log('sus');
     }
   })
 }

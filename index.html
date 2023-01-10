@@ -14,7 +14,7 @@
         body {
             background-color: #2f2f2f;
         }
-        </style>
+    </style>
 
 </head>
 <audio src="#"></audio>
@@ -23,7 +23,8 @@
     <canvas id="myCanvas" width="1920" height="1080"></canvas>
     <script type='module' defer>
         import { Menu } from './scripts/Menu.js';
-        
+        import { setMusic, muteMusic, lowerMusic, higherMusic, getMusicTime } from './scripts/sound.js';
+
         const canvas = document.getElementById('myCanvas');
         /** @type {CanvasRenderingContext2D} */
         const ctx = canvas.getContext('2d');
@@ -31,55 +32,67 @@
         ctx.font = font;
 
         let menu = new Menu(['User', 'Start', 'Options']);
+        menu.selectDown();
         function updateMenu(timestamp) {
-                if (username.length != 0) {
-                    menu.options[0].string = username;
-                } else {
-                    menu.options[0].string = 'Type here!';
+            if (menu.getSelectedItem() != 0) {
+                if (pressedKeys['m'])
+                    muteMusic(timestamp);
+                if (pressedKeys['-']) {
+                    lowerMusic();
                 }
-
-                if ((pressedKeys['arrowup']) && !menu.moved) {
-                    menu.moved = true;
-                    menu.timestamp = timestamp;
-                    menu.selectUp();
-                    return;
-                }
-                if ((pressedKeys['arrowdown']) && !menu.moved) {
-                    menu.moved = true;
-                    menu.timestamp = timestamp;
-                    menu.selectDown();
-                    return;
-                }
-                if (menu.moved && timestamp - menu.timestamp >= 100) {
-                    menu.moved = false;
-                    return;
-                }
-                if (pressedKeys['enter']) {
-                    menu.options.forEach(e => {
-                        if (e.checked) {
-                            switch (e.place) {
-                                case 0: // username thing
-                                    localStorage.setItem('username', username);
-                                    break;
-                                case 1: // start
-                                    localStorage.setItem('username', username);
-                                    window.location.replace('./game.html');
-                                    break;
-                                case 2: // options
-                                    // console.log('options');
-                                    window.location.replace('./settings.html');
-                                    break;
-                            }
-                        }
-
-                    });
+                if (pressedKeys['+']) {
+                    higherMusic();
                 }
             }
+            if (username.length != 0) {
+                menu.options[0].string = username;
+            } else {
+                menu.options[0].string = 'Type here!';
+            }
+
+            if ((pressedKeys['arrowup']) && !menu.moved) {
+                menu.moved = true;
+                menu.timestamp = timestamp;
+                menu.selectUp();
+                return;
+            }
+            if ((pressedKeys['arrowdown']) && !menu.moved) {
+                menu.moved = true;
+                menu.timestamp = timestamp;
+                menu.selectDown();
+                return;
+            }
+            if (menu.moved && timestamp - menu.timestamp >= 100) {
+                menu.moved = false;
+                return;
+            }
+            if (pressedKeys['enter']) {
+                menu.options.forEach(e => {
+                    if (e.checked) {
+                        switch (e.place) {
+                            case 0: // username thing
+                                localStorage.setItem('username', username);
+                                break;
+                            case 1: // start
+                                localStorage.setItem('username', username);
+                                localStorage.setItem('musicTime', getMusicTime());
+                                window.location.replace('./game.html');
+                                break;
+                            case 2: // options
+                                // console.log('options');
+                                window.location.replace('./settings.html');
+                                break;
+                        }
+                    }
+
+                });
+            }
+        }
         let username = "";
         let pressedKeys = {};
         let lastFrame = 0;
         document.body.onload = () => {
-            console.log('loaded');
+            // console.log('loaded');
             if (!typeof localStorage.getItem('up') !== 'undefined') {
                 localStorage.setItem('up', 'arrowup|w');
                 localStorage.setItem('down', 'arrowdown|s');
@@ -90,16 +103,17 @@
                 localStorage.setItem('color', 'salmon');
             }
             if (!typeof localStorage.getItem('volume') !== 'undefined') {
-                localStorage.setItem('volume', '100');
+                localStorage.setItem('volume', '40');
             }
 
             username = localStorage.getItem('username') ? localStorage.getItem('username') : '';
-            console.log(username);
-            
+            // console.log(username);
+
         }
 
         addEventListener('keyup', handleKey, false);
         addEventListener('keydown', handleKey, false);
+        setMusic();
 
         // <!--! menu UPDATES THE WHOLE THING -->
 
