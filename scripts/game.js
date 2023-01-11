@@ -3,7 +3,7 @@ import { KeysHandler, mouseHandler } from './inputHandler.js';
 import { ui_setup, ui_update, ui_draw } from './ui.js';
 import { scaleHandler } from './zoomHandle.js';
 import { bg_draw, bg_setup, bg_update } from './bg.js';
-import { setMusic, muteMusic, lowerMusic, higherMusic, getMusicTime, setMusicTime } from './sound.js';
+import { setMusic, muteMusic, lowerMusic, higherMusic, getMusicTime, setMusicTime, isMusicMuted } from './sound.js';
 import { spawnMobs, updateMobs, drawMobs } from './enemy.js';
 
 export let view = [1, 0, 0, 1, 0, 0];  // Matrix representing the view. (scale, 0, 0, scale, widthNew, HeightNew)
@@ -57,7 +57,7 @@ addEventListener('DOMContentLoaded', () => {
   // addEventListener('wheel', scaleHandler, false); //removed because i couldn't figure it out 😔
   addEventListener('keydown', KeysHandler, false);
   addEventListener('keyup', KeysHandler, false);
-  addEventListener('focusout', () => { isRunning = false; }, false)
+  addEventListener('blur', () => { isRunning = false; }, false)
   // addEventListener('auxclick', mouseHandler, false);
   // addEventListener('mouseover', () => { canvas.focus(); });
 
@@ -76,12 +76,18 @@ async function loop(timestamp) {
     if (!mobspanw) {
       mobspanw = setInterval(spawnMobs, 100);
     }
+    // if(isMusicMuted()){
+    //   muteMusic(timestamp); // starts music after unpausing
+    // }
     player.update(progress);
     update(progress);
     bg_update(progress);
     updateMobs(progress);
   } else {
-    // clearInterval(mobspanw); // don't spawn mobs during paused screen
+    clearInterval(mobspanw); // don't spawn mobs during paused screen
+    if (!isMusicMuted()){
+      muteMusic(timestamp);
+    }
   }
 
   draw();

@@ -33,11 +33,12 @@ export class Player {
     this.#position.y = Math.min(Math.max(this.#position.y, 0), limit.y - this.#sprite.height);
   }
 
-  #checkDamage(progress, source) {
+  checkDamage(progress, source) {
+    // console.log('test');
     this.#immunityFrames -= progress;
     if (this.#immunityFrames <= 0) {
       this.#immunityFrames = 300;
-      this.takeDamage(source);
+      this.#takeDamage(source);
       return true;
     }
     return false;
@@ -99,12 +100,12 @@ export class Player {
     window.location.replace('/index.html');
   }
 
-  takeDamage(source) {
-    console.log(this.#health);
+  #takeDamage(source) {
+    // console.log(this.#health);
     this.#health -= source.damage;
     if (this.#health < 0)
       this.die();
-    console.log('died');
+    // console.log('died');
     update_health(this.#health);
   }
 

@@ -12,16 +12,19 @@ class Enemy {
   goToPosition = { x: Number, y: Number };
   direction = { x: Number, y: Number };
   #position = { x: Number, y: Number };
+  collisionRect;
+
 
   constructor(type, spawnPosition) {
     this.#sprite = new Image(256, 256);
     switch (type) {
       case 0:
         this.#speed = 2.1;
-
+        this.damage = 10;
         break;
       case 1:
         this.#speed = 1.5;
+        this.damage = 17;
         break;
       case 2:
         // scrapped idea
@@ -30,7 +33,13 @@ class Enemy {
     this.#diagSpeed = this.#speed * Math.sqrt(2);
     this.#sprite.src = './assets/enemy' + type.toString() + '.png';
     this.#position = spawnPosition;
-    this.damage = 10;
+    // this.damage = 10;
+    this.collisionRect = {
+      x1: this.#position.x + 10,
+      y1: this.#position.y + 10,
+      x2: this.#position.x + this.#sprite.width - 20,
+      y2: this.#position.y + this.#sprite.height - 20
+    };
     // this.lookForPlayer = setInterval(function () {
     //   this.goToPosition = { x: player.getPosition().x, y: player.getPosition().y };
     //   // console.log(this.goToPosition);  
@@ -87,6 +96,12 @@ class Enemy {
     this.#position.x += vector2.x;
     this.#position.y += vector2.y;
     this.#checkInBounds();
+    this.collisionRect = {
+      x1: this.#position.x + 10,
+      y1: this.#position.y + 10,
+      x2: this.#position.x + this.#sprite.width - 20,
+      y2: this.#position.y + this.#sprite.height - 20
+    };
   }
 
   dealDamage(source) {
@@ -95,6 +110,27 @@ class Enemy {
       this.die();
     }
   }
+
+  AABB(other) {
+    const otherRect = {
+      x1: other.getPosition().x + 10,
+      y1: other.getPosition().y + 10,
+      x2: other.getPosition().x + other.getSprite().width - 20,
+      y2: other.getPosition().y + other.getSprite().height - 20
+    };
+    // console.log('other rect: ', otherRect);
+    // console.log('this rect:', this.collisionRect);
+    if (
+      this.collisionRect.x2 >= otherRect.x1 &&
+      otherRect.x2 >= this.collisionRect.x1 &&
+      this.collisionRect.y2 >= otherRect.y1 &&
+      otherRect.y2 >= this.collisionRect.y1
+    ) {
+      return true;
+    }
+    return false;
+  }
+
 }
 
 let mobs = [];
@@ -113,18 +149,19 @@ export function spawnMobs() {
 }
 
 export function updateMobs(progress) {
-  progress /= 100;
+  // progress /= 100;
   for (let i in mobs) {
     mobs[i].pathfind();
-    mobs[i].move({ x: mobs[i].direction.x * progress, y: mobs[i].direction.y * progress });
+    mobs[i].move({ x: mobs[i].direction.x * progress / 100, y: mobs[i].direction.y * progress / 100 });
     // console.log(mobs[i].getPosition());
   }
-  if (mobs.length > 50) {                   // make sure to only have 20 at once 
-    while (mobs.length > 50) {
+  if (mobs.length > 1) {                   // make sure to only have 50 at once 
+    while (mobs.length > 1) {
       mobs.pop();
     }
   }
 
+  checkCollision(player, progress);
 }
 
 export function drawMobs(ctx) {
@@ -146,4 +183,14 @@ function removeFromList(defeatedEnemy) {
       console.log('sus');
     }
   })
+}
+
+function checkCollision(player, progress) {
+  for (let i in mobs) {
+    // console.log(mobs[i].collisionRect, player.getPosition(), player.getSprite().width, player.getSprite().height);
+    if (mobs[i].AABB(player)) {
+      // console.log('collided');
+      player.checkDamage(progress, mobs[i]);
+    }
+  }
 }

@@ -47,7 +47,7 @@
         function KeysHandler(event) {
             const key = event.key.toLowerCase();
             pressedKeys[key] = event.type === 'keydown';
-            console.log(pressedKeys);
+            // console.log(pressedKeys);
         }
 
 
@@ -71,8 +71,13 @@
                 }
                 if (pressedKeys['enter']) {
                     console.log(`Clicked on ${menu.getSelectedItem()}`);
+                    menu.rebindKey(menu.getSelectedItem());
+
                 }
                 if (pressedKeys['backspace']) {
+                    // console.log(window.history);
+                    if (window.history.length > 0)
+                        window.history.back();
                     window.location.replace('./index.html');
                 }
             } else if (timestamp - menu.timestamp >= 100) { // 100 ms delay after interaction

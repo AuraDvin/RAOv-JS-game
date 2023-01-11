@@ -2,6 +2,7 @@ export class Menu {
     options = [];
     timestamp = 0;
     moved = false;
+    rebinding = false;
     //<!--? menu is dynamic and works with multiple options. but it doen't check for overflow D:
     constructor(options = []) {
         let i = 0;
@@ -45,5 +46,10 @@ export class Menu {
                 return;
             }
         }
+    }
+
+    rebindKey(index) {
+        console.log(`Rebinding ${index} key`);
+        
     }
 };

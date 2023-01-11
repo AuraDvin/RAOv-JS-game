@@ -15,8 +15,12 @@ export function setMusic() {
     music.setAttribute('autoplay', 'autoplay');
     music.loop = true;
     document.body.appendChild(music);
-    console.log('done music', {music});
+    // console.log('done music', { music });
     music.play();
+}
+
+export function isMusicMuted(){
+    return music.paused;
 }
 
 export function muteMusic(timestamp) {
@@ -56,5 +60,8 @@ export function getMusicTime() {
     return music.currentTime;
 }
 export function setMusicTime(time) {
+    if (!time) {
+        time = 0;
+    }
     music.currentTime = parseFloat(time);
 }
