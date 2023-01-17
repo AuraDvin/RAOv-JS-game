@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+    <title>Settings</title>
     <style>
         body {
             margin: 0;
@@ -22,7 +23,7 @@
         }
 
         .selected {
-            outline: 1px outset green;
+            outline: 1px outset red;
             font-size: 3rem;
             display: grid;
             padding-top: 1vh;
@@ -40,6 +41,16 @@
             display: flex;
             justify-content: center;
         }
+
+        div.notes > p{
+            font-size: 1rem;
+            color: #c7c7c7;
+        }
+
+        #typing{
+            color: red;
+            font-size: 2rem;
+        }
     </style>
 </head>
 
@@ -47,27 +58,35 @@
     <h1>Settings</h1>
 
     <span id="table"></span>
-    <script>
+    <div class="notes">
+        <p> Use [ARROW KEYS] to move up and down the menu or use your mouse </p>
+        <p> Press [Enter] or [Left Mouse Button] and a key to change the keybind or [ESCAPE] to reset to defaults</p>
+        <p> Use [BACKSPACE] to go to the previous screen </p>
+        <p id="typing" hidden> NOW PRESS A BUTTON TO SET SETTING OR PRESS [ESCAPE] TO RESET </p>
+    </div>
+    <script type="module" defer>
+        import { defaults, setDefaults } from './scripts/inputHandler.js';
+        import { setMusic, setMusicTime } from './scripts/sound.js';
 
+
+        setMusic();
+        setMusicTime(parseFloat(localStorage.musicTime));
+        if (!localStorage.length) setDefaults();
+        console.log(defaults);
         /**
-         * TODO: now make sure there can't be multiple settings of the same key (up and down is 'w' for example)
-         */
-        // localStorage.setItem('up', 'w');
-        // localStorage.setItem('down', 's');
-        // localStorage.setItem('left', 'a');
-        // localStorage.setItem('right', 'd');
-        const defaults = {
-            'up': 'w',
-            'down': 's',
-            'left': 'a',
-            'right': 'd'
-        }
+        * TODO: now make sure there can't be multiple settings of the same key (up and down is 'w' for example)
+        */
+
         let settings = [
-            { string: `move up ${localStorage.getItem('up')}`, selected: true },
-            { string: `move down ${localStorage.getItem('down')}`, selected: false },
-            { string: `move left ${localStorage.getItem('left')}`, selected: false },
-            { string: `move right ${localStorage.getItem('right')}`, selected: false },
+            { string: `move up: ${localStorage.getItem('up')}`, selected: true },
+            { string: `move down: ${localStorage.getItem('down')}`, selected: false },
+            { string: `move left: ${localStorage.getItem('left')}`, selected: false },
+            { string: `move right: ${localStorage.getItem('right')}`, selected: false },
+            { string: `music up: ${localStorage.getItem('vup')}`, selected: false },
+            { string: `music down: ${localStorage.getItem('vdown')}`, selected: false },
+            { string: `music mute: ${localStorage.getItem('vmute')}`, selected: false },
         ];
+
         let table = document.createElement('table');
         let lastImput = 0;
         let keys = {};
@@ -108,18 +127,47 @@
             clearTimeout(inputDelay);
             allowInput = true;
             // console.log(table.children[getSelected()].innerHTML.split(' '));
-            const leSetting = table.children[getSelected()].innerHTML.split(' ');
-            if (leSetting[0] === 'move') {
-                if (key === 'escape') {
-                    localStorage.setItem(leSetting[1], defaults[leSetting[1]]);
-                    table.children[getSelected()].innerHTML = leSetting[0] + ' ' + leSetting[1] + ' ' + defaults[leSetting[1]];
-                    settings[getSelected()].string = leSetting[0] + ' ' + leSetting[1] + ' ' + defaults[leSetting[1]];
-                } else {
-                    localStorage.setItem(leSetting[1], key);
-                    table.children[getSelected()].innerHTML = leSetting[0] + ' ' + leSetting[1] + ' ' + key;
-                    settings[getSelected()].string = leSetting[0] + ' ' + leSetting[1] + ' ' + key;
-                }
+            let lePreSetting = table.children[getSelected()].innerHTML.split(' ');
+            lePreSetting[1] = lePreSetting[1].split(":")[0];
+            const leSetting = lePreSetting;
+            console.log(leSetting);
+            switch (leSetting[0]) {
+                case 'move':
+                    if (key === 'escape') {
+                        localStorage[leSetting[1]] = defaults.move[leSetting[1]];
+                        table.children[getSelected()].innerHTML = leSetting[0] + ' ' + leSetting[1] + ': ' + defaults.move[leSetting[1]];
+                        settings[getSelected()].string = leSetting[0] + ' ' + leSetting[1] + ': ' + defaults.move[leSetting[1]];
+                    } else {
+                        localStorage[leSetting[1]] = key;
+                        table.children[getSelected()].innerHTML = leSetting[0] + ' ' + leSetting[1] + ': ' + key;
+                        settings[getSelected()].string = leSetting[0] + ' ' + leSetting[1] + ': ' + key;
+                    }
+                    break;
+                case 'music':
+                    if (key === 'escape') {
+                        localStorage['v' + leSetting[1]] = defaults.music[leSetting[1]];
+                        table.children[getSelected()].innerHTML = leSetting[0] + ' ' + leSetting[1] + ': ' + defaults.music[leSetting[1]];
+                        settings[getSelected()].string = leSetting[0] + ' ' + leSetting[1] + ': ' + defaults.music[leSetting[1]];
+                    } else {
+                        localStorage['v' + leSetting[1]] = key;
+                        table.children[getSelected()].innerHTML = leSetting[0] + ' ' + leSetting[1] + ': ' + key;
+                        settings[getSelected()].string = leSetting[0] + ' ' + leSetting[1] + ': ' + key;
+                    }
+                    break;
             }
+
+
+            // if (leSetting[0] === 'move') {
+            //     if (key === 'escape') {
+            //         localStorage.setItem(leSetting[1], defaults[leSetting[1]]);
+            //         table.children[getSelected()].innerHTML = leSetting[0] + ' ' + leSetting[1] + ' ' + defaults[leSetting[1]];
+            //         settings[getSelected()].string = leSetting[0] + ' ' + leSetting[1] + ' ' + defaults[leSetting[1]];
+            //     } else {
+            //         localStorage.setItem(leSetting[1], key);
+            //         table.children[getSelected()].innerHTML = leSetting[0] + ' ' + leSetting[1] + ' ' + key;
+            //         settings[getSelected()].string = leSetting[0] + ' ' + leSetting[1] + ' ' + key;
+            //     }
+            // }
 
         }
 
@@ -153,7 +201,7 @@
 
         function updateHover(e) {
             if (allowInput) {
-                let dis = e.path[0];
+                let dis = e.target;
                 const isHoveredOver = (e) => e.innerHTML === dis.innerHTML;
                 if (!dis.classList.contains('selected')) {
                     settings[getSelected()].selected = false;
@@ -168,13 +216,17 @@
 
 
         function update(timestamp) {
+            // if (!allowInput){
+                document.getElementById('typing').hidden = allowInput;
+            // } 
             if (
                 allowInput &&
                 timestamp - lastImput >= 100 &&
                 (
                     keys['arrowdown'] ||
                     keys['arrowup'] ||
-                    keys['enter']
+                    keys['enter'] || 
+                    keys['backspace']
                 )
 
             ) {
@@ -207,6 +259,16 @@
                 if (keys['enter']) {
                     // console.log(getSelected());
                     clickEvent();
+                }
+                if (keys['backspace']){
+                    console.log('huh');
+                    if (history.length > 1){
+                        console.log('true');
+                        history.back();
+                    } else {
+                        console.log('on God');
+                        window.location.href = './index.html';
+                    }
                 }
             }
             window.requestAnimationFrame(update);

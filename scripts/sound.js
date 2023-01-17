@@ -1,8 +1,8 @@
-let volume = localStorage.getItem('volume');
+let volume = parseInt(localStorage.getItem('volume'));
 let music = document.createElement('audio');
 let m_timestamp = 0;
 export function setMusic() {
-    if (volume) {
+    if (!isNaN(volume) && volume > 0 && volume < 100) {
         music.volume = parseInt(volume) * 0.01;
     } else {
         music.volume = 0.1;      // 10%

@@ -17,22 +17,28 @@
     </style>
 
 </head>
-<audio src="#"></audio>
+<!-- <audio src="#"></audio> -->
 
 <body>
     <canvas id="myCanvas" width="1920" height="1080"></canvas>
     <script type='module' defer>
         import { Menu } from './scripts/Menu.js';
         import { setMusic, muteMusic, lowerMusic, higherMusic, getMusicTime } from './scripts/sound.js';
-
+        import { setDefaults } from './scripts/inputHandler.js';
+        
         const canvas = document.getElementById('myCanvas');
         /** @type {CanvasRenderingContext2D} */
         const ctx = canvas.getContext('2d');
         const font = '42px sans-serif';
         ctx.font = font;
-
+        
+        let username = "";
+        let pressedKeys = {};
+        let lastFrame = 0;
+        let updateId = setInterval(window.requestAnimationFrame, 32, update);
         let menu = new Menu(['User', 'Start', 'Options']);
         menu.selectDown();
+
         function updateMenu(timestamp) {
             if (menu.getSelectedItem() != 0) {
                 if (pressedKeys['m'])
@@ -70,17 +76,16 @@
                 menu.options.forEach(e => {
                     if (e.checked) {
                         switch (e.place) {
-                            case 0: // username thing
+                            case 0:
                                 localStorage.setItem('username', username);
                                 break;
-                            case 1: // start
+                            case 1:
                                 localStorage.setItem('username', username);
                                 localStorage.setItem('musicTime', getMusicTime());
-                                window.location.replace('./game.html');
+                                window.location.href = './game.html';
                                 break;
-                            case 2: // options
-                                // console.log('options');
-                                window.location.replace('./settings.html');
+                            case 2:
+                                window.location.href = './settingsAlpha.html';
                                 break;
                         }
                     }
@@ -88,47 +93,26 @@
                 });
             }
         }
-        let username = "";
-        let pressedKeys = {};
-        let lastFrame = 0;
+
         document.body.onload = () => {
-            // console.log('loaded');
-            if (!typeof localStorage.getItem('up') !== 'undefined') {
-                localStorage.setItem('up', 'arrowup|w');
-                localStorage.setItem('down', 'arrowdown|s');
-                localStorage.setItem('left', 'arrowleft|a');
-                localStorage.setItem('right', 'arrowright|d');
-            }
-            if (!typeof localStorage.getItem('color') !== 'undefined') {
-                localStorage.setItem('color', 'salmon');
-            }
-            if (!typeof localStorage.getItem('volume') !== 'undefined') {
-                localStorage.setItem('volume', '40');
-            }
-
+            if (!localStorage.length) { setDefaults(); }
             username = localStorage.getItem('username') ? localStorage.getItem('username') : '';
-            // console.log(username);
-
         }
-
         addEventListener('keyup', handleKey, false);
         addEventListener('keydown', handleKey, false);
         setMusic();
 
-        // <!--! menu UPDATES THE WHOLE THING -->
-
-        let updateId = setInterval(window.requestAnimationFrame, 32, update);
 
         function handleKey(event) {
             pressedKeys[event.key.toLowerCase()] = event.type == 'keydown';
             const key = event.key.toLowerCase();
 
-            if (menu.getSelectedItem() === 0 && pressedKeys[key.toLowerCase()]) { // is entering username
+            if (menu.getSelectedItem() === 0 && pressedKeys[key.toLowerCase()]) {
                 if (
                     (key.length == 1) && (
-                        (key >= 'a' && key <= 'z') || // a letter
-                        (key >= '0' && key <= '9') || // a number
-                        ([' ', '-', '_'].includes(key)) //  _   -
+                        (key >= 'a' && key <= 'z') ||
+                        (key >= '0' && key <= '9') ||
+                        ([' ', '-', '_'].includes(key))
                     ) || (
                         key == 'backspace'
                     )
@@ -141,16 +125,16 @@
 
         function handleUsername(key) {
             if (key != 'backspace' && username.length > 12) {
-                // console.log("it's too large D:");
+
                 return;
             }
             if (key == 'backspace') {
                 username = username.substring(0, username.length - 1);
-                // console.log(username);
+
                 return;
             }
             username += key;
-            // console.log(username);
+
             return;
 
         }
@@ -162,31 +146,27 @@
                 localStorage.setItem('username', 'no username');
         }
 
-        // <!--. Actual important code
 
+        // <!--! update -->
         function update(timestamp) {
-            // updates += 1000;
             let progress = timestamp - lastFrame;
             lastFrame = timestamp;
-            // console.log('ups ', Math.floor(updates/timestamp));
+
             updateMenu(timestamp);
             draw();
         }
 
         function draw() {
             ctx.fillStyle = 'white';
-            // ctx.font = '30px Arial';
 
             const windowWidth = 1920 * 0.5;
             const start = 120;
             const usernameWidth = ctx.measureText(menu.options[0].string).width;
 
-            ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             menu.options.forEach(e => {
-
                 ctx.fillText(e.string, windowWidth, start + 10 + e.place * 42);
-
                 if (e.checked) {
                     ctx.lineWidth = 6;
                     ctx.strokeStyle = '#F2F2F2';
@@ -197,7 +177,6 @@
                     ctx.stroke();
 
                 }
-
                 if (e.place == 0) {
                     ctx.fillRect(windowWidth, start + 14, usernameWidth, 2);
                 }

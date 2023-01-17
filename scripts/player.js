@@ -50,15 +50,15 @@ export class Player {
       y: 0
     }
     //. Up is negative, down is positive (origin in topleft)
-    if (KeysPressed['w'] || KeysPressed['arrowup']) {
+    if (KeysPressed[localStorage.up]) {
       move.y = -this.speed;
-    } else if (KeysPressed['s'] || KeysPressed['arrowdown']) {
+    } else if (KeysPressed[localStorage.down]) {
       move.y = this.speed;
     }
 
-    if (KeysPressed['d'] || KeysPressed['arrowright']) {
+    if (KeysPressed[localStorage.right]) {
       move.x = this.speed;
-    } else if (KeysPressed['a'] || KeysPressed['arrowleft']) {
+    } else if (KeysPressed[localStorage.left]) {
       move.x = -this.speed;
     }
 
@@ -73,7 +73,7 @@ export class Player {
 
 
 
-    if (KeysPressed['t']) {
+    if (KeysPressed[localStorage]) {
       // this.#checkDamage(progress, { damage: 10 });
     }
 
