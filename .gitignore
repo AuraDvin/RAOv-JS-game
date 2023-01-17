@@ -1,3 +1,5 @@
 #VSC folder
 .vscode/
 assets/fonts
+#defaults
+defaults.json

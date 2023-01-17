@@ -42,12 +42,12 @@
             justify-content: center;
         }
 
-        div.notes > p{
+        div.notes>p {
             font-size: 1rem;
             color: #c7c7c7;
         }
 
-        #typing{
+        #typing {
             color: red;
             font-size: 2rem;
         }
@@ -123,10 +123,8 @@
 
 
         function setnew(key) {
-            // console.log('new key set:', key);
             clearTimeout(inputDelay);
             allowInput = true;
-            // console.log(table.children[getSelected()].innerHTML.split(' '));
             let lePreSetting = table.children[getSelected()].innerHTML.split(' ');
             lePreSetting[1] = lePreSetting[1].split(":")[0];
             const leSetting = lePreSetting;
@@ -155,20 +153,6 @@
                     }
                     break;
             }
-
-
-            // if (leSetting[0] === 'move') {
-            //     if (key === 'escape') {
-            //         localStorage.setItem(leSetting[1], defaults[leSetting[1]]);
-            //         table.children[getSelected()].innerHTML = leSetting[0] + ' ' + leSetting[1] + ' ' + defaults[leSetting[1]];
-            //         settings[getSelected()].string = leSetting[0] + ' ' + leSetting[1] + ' ' + defaults[leSetting[1]];
-            //     } else {
-            //         localStorage.setItem(leSetting[1], key);
-            //         table.children[getSelected()].innerHTML = leSetting[0] + ' ' + leSetting[1] + ' ' + key;
-            //         settings[getSelected()].string = leSetting[0] + ' ' + leSetting[1] + ' ' + key;
-            //     }
-            // }
-
         }
 
         function clickEvent() {
@@ -176,14 +160,12 @@
             inputDelay = setTimeout(() => { console.log('test'); allowInput = true; }, 10000); // after 10s set allowInput to true
         }
 
-
         function getSelected() {
             for (let i in settings) {
                 if (settings[i].selected)
                     return Number(i);
             }
         }
-
 
         function updateClasses() {
             if (allowInput) {
@@ -211,21 +193,16 @@
             }
         }
 
-
-
-
-
+        // <!--. UPDATE FUNCTION (important)
         function update(timestamp) {
-            // if (!allowInput){
-                document.getElementById('typing').hidden = allowInput;
-            // } 
+            document.getElementById('typing').hidden = allowInput;
             if (
                 allowInput &&
                 timestamp - lastImput >= 100 &&
                 (
                     keys['arrowdown'] ||
                     keys['arrowup'] ||
-                    keys['enter'] || 
+                    keys['enter'] ||
                     keys['backspace']
                 )
 
@@ -260,13 +237,10 @@
                     // console.log(getSelected());
                     clickEvent();
                 }
-                if (keys['backspace']){
-                    console.log('huh');
-                    if (history.length > 1){
-                        console.log('true');
+                if (keys['backspace']) {
+                    if (history.length > 1) {
                         history.back();
                     } else {
-                        console.log('on God');
                         window.location.href = './index.html';
                     }
                 }
