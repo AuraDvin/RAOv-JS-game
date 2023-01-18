@@ -1,5 +1,7 @@
 import { KeysPressed } from './inputHandler.js';
 import { update_health } from './ui.js';
+import { fireBullet, updateBullets, drawBullets } from './bullet.js';
+
 let limit = {
   x: 7680,
   y: 4320
@@ -12,10 +14,13 @@ export class Player {
   #position = { x: Number(), y: Number() };
   #immunityFrames = 300;
   #color = String();
+  #shootCoolDown = Number();
+  #shootTimer = Number();
   speed = Number();
   diagSpeed = Number();
 
-  constructor(img = String, name = String, color = String) {
+
+  constructor(img = String, name = String) {
     this.#name = name;
     this.#health = 100;
     this.#sprite = new Image(256, 256);
@@ -23,7 +28,9 @@ export class Player {
     this.#position = { x: Math.floor(1920 / 2 - (this.#sprite.width / 2)), y: Math.floor(1080 / 2 - (this.#sprite.height / 2)) };
     this.speed = 2;
     this.diagSpeed = Math.floor(this.speed * Math.sqrt(0.5)); // This just makes it so we move diagonally at this.speed
-    this.#color = 'salmon';
+    this.#shootCoolDown = 100;
+    this.#color = localStorage.color ? localStorage.color : 'salmon';
+    this.#shootTimer = 0;
     // console.log(this);
   }
 
@@ -71,11 +78,15 @@ export class Player {
 
     this.move(move);
 
-
-
-    if (KeysPressed[localStorage]) {
-      // this.#checkDamage(progress, { damage: 10 });
+    this.#shootTimer += progress;
+    if (KeysPressed[localStorage.shoot]){
+      if (this.#shootTimer >= this.#shootCoolDown){
+        console.log('user shot');
+        this.#shootTimer = 0;
+        fireBullet();        
+      }
     }
+    updateBullets(progress);
 
   }
 
@@ -120,5 +131,7 @@ export class Player {
     ctx.fillStyle = 'Black';
     ctx.fillText(this.#name, this.#position.x + this.#sprite.width * 0.5 - ctx.measureText(this.#name).width * 0.5, this.#position.y + 100);
     ctx.font = '30px Tahoma';
+
+    drawBullets(ctx);
   }
 }

@@ -1,9 +1,11 @@
 import { player } from "./game.js";
+import { bulletCollision } from './bullet.js';
 
 const enemyTypes = ['fast', 'strong'/*, 'ranged'*/];
-
+let lastId = 0;
 
 class Enemy {
+  id;
   #health = 100;
   #sprite;
   #speed = Number;
@@ -15,7 +17,8 @@ class Enemy {
   collisionRect;
 
 
-  constructor(type, spawnPosition) {
+  constructor(type, spawnPosition, id) {
+    this.id = id;
     this.#sprite = new Image(256, 256);
     switch (type) {
       case 0:
@@ -77,7 +80,7 @@ class Enemy {
   }
   die() {
     console.log("enemy defeated");
-    removeFromList(this);
+    removeFromList(this.id);
   }
 
   getSprite() {
@@ -88,10 +91,12 @@ class Enemy {
   getPosition() {
     return { x: this.#position.x, y: this.#position.y };
   }
+
   #checkInBounds() {
     this.#position.x = Math.min(Math.max(0, this.#position.x), 7680 - this.#sprite.width * 0.5);
     this.#position.y = Math.min(Math.max(0, this.#position.y), 4320 - this.#sprite.height * 0.5);
   }
+
   move(vector2) {
     this.#position.x += vector2.x;
     this.#position.y += vector2.y;
@@ -135,17 +140,24 @@ class Enemy {
 
 let mobs = [];
 
+/**TODO 
+ * TODO: set spawn position to anywhere **OUTSIDE** the viewport 
+ * TODO: add score after killing enemies :D
+ */
+
 export function spawnMobs() {
   const type = Math.floor(Math.random() * (enemyTypes.length - 1));
-  // debugger;
+  
   const spawnPosition = {
     x: Math.floor(Math.random() * 7680),
     y: Math.floor(Math.random() * 4320)
   };
 
-  let newMob = new Enemy(type, spawnPosition);
+  let newMob = new Enemy(type, spawnPosition, lastId);
+  lastId++;
 
   mobs.push(newMob);
+  let t = setTimeout(spawnMobs, 350);
 }
 
 export function updateMobs(progress) {
@@ -155,8 +167,8 @@ export function updateMobs(progress) {
     mobs[i].move({ x: mobs[i].direction.x * progress / 100, y: mobs[i].direction.y * progress / 100 });
     // console.log(mobs[i].getPosition());
   }
-  if (mobs.length > 1) {                   // make sure to only have 50 at once 
-    while (mobs.length > 1) {
+  if (mobs.length > 50) {                   // make sure to only have 50 at once 
+    while (mobs.length > 50) {
       mobs.pop();
     }
   }
@@ -175,14 +187,20 @@ export function drawMobs(ctx) {
 }
 
 
-function removeFromList(defeatedEnemy) {
-  mobs.forEach((e, i) => {
-    if (e === defeatedEnemy) { // does this even work? wait what in this project does work.
-      // clearInterval(mobs[i].lookForPlayer); // stop calling funciton after it no exists
-      delete (mobs[i]); // removes enemy from list entirely
-      console.log('sus');
+function removeFromList(defeatedEnemyId) {
+  // mobs.forEach((e, i) => {
+  //   if (e === defeatedEnemy) { // does this even work? wait what in this project does work.
+  //     // clearInterval(mobs[i].lookForPlayer); // stop calling funciton after it no exists
+  //     delete (mobs[i]); // removes enemy from list entirely
+  //     console.log('sus');
+  //   }
+  // })
+  for (let i in mobs) {
+    if (mobs[i].id == defeatedEnemyId) {
+      delete (mobs[i]);
+      break;
     }
-  })
+  }
 }
 
 function checkCollision(player, progress) {
@@ -191,6 +209,12 @@ function checkCollision(player, progress) {
     if (mobs[i].AABB(player)) {
       // console.log('collided');
       player.checkDamage(progress, mobs[i]);
+    }
+    try {
+      bulletCollision(progress, mobs[i]);
+    } catch (err) {
+      console.log(mobs[i]);
+      console.error('moment of moments');
     }
   }
 }

@@ -1,0 +1,46 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    font-size: 2rem;
+    background-color: #2f2f2f;
+    color: aliceblue;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.selected {
+    outline: 1px outset red;
+    font-size: 3rem;
+    display: grid;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+}
+
+td {
+    display: table-row;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+span {
+    display: flex;
+    justify-content: center;
+}
+
+div.notes>p {
+    font-size: 1rem;
+    color: #c7c7c7;
+}
+
+#typing {
+    color: red;
+    font-size: 2rem;
+}
+
+input[type='color']{
+    vertical-align: middle; 
+}

@@ -1,10 +1,11 @@
 import { Player } from './player.js';
-import { KeysHandler, mouseHandler } from './inputHandler.js';
+import { KeysHandler, areSettingsSet} from './inputHandler.js';
 import { ui_setup, ui_update, ui_draw } from './ui.js';
 import { scaleHandler } from './zoomHandle.js';
 import { bg_draw, bg_setup, bg_update } from './bg.js';
 import { setMusic, muteMusic, lowerMusic, higherMusic, getMusicTime, setMusicTime, isMusicMuted } from './sound.js';
 import { spawnMobs, updateMobs, drawMobs } from './enemy.js';
+import { getMousePosition } from './bullet.js';
 
 export let view = [1, 0, 0, 1, 0, 0];  // Matrix representing the view. (scale, 0, 0, scale, widthNew, HeightNew)
 export let player;
@@ -29,12 +30,13 @@ export function changePause() {
 
 if (document.title === 'Zombsio Recreation') {
   addEventListener('DOMContentLoaded', () => {
+    // getMousePosition();
+    areSettingsSet();
     setMusic();
-    setMusicTime(parseFloat(localStorage.musicTime));
+    // setMusicTime(0);
 
     const user = localStorage.getItem('username');
-    const color = localStorage.getItem('color');
-    player = new Player(assets + 'player.png', user, color);
+    player = new Player(assets + 'player.png', user);
     canvas = document.getElementById("player");
     canvas.focus();
     canvas.width = 1920;
@@ -47,13 +49,15 @@ if (document.title === 'Zombsio Recreation') {
     // addEventListener('wheel', scaleHandler, false); //removed because i couldn't figure it out 😔
     addEventListener('keydown', KeysHandler, false);
     addEventListener('keyup', KeysHandler, false);
-    addEventListener('blur', () => { isRunning = false; }, false)
+    addEventListener('blur', () => { isRunning = false; }, false);
+    addEventListener('mousemove', getMousePosition, false);
+
     // addEventListener('auxclick', mouseHandler, false);
     // addEventListener('mouseover', () => { canvas.focus(); });
 
 
     window.requestAnimationFrame(loop);
-    mobspanw = setInterval(spawnMobs, 100);
+    mobspanw = setTimeout(spawnMobs, 350);
   });
 }
 

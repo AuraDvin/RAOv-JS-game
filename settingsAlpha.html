@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
     <meta charset="UTF-8">
@@ -7,57 +7,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
     <title>Settings</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: sans-serif;
-            font-size: 2rem;
-            background-color: #2f2f2f;
-            color: aliceblue;
+    <link rel="stylesheet" href="./styles/settings.css">
+    <script>
 
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
+        function changecolor() {
+            // console.log(document.getElementById('playerColor').value);
+            localStorage.setItem('color', document.getElementById('playerColor').value);
         }
 
-        .selected {
-            outline: 1px outset red;
-            font-size: 3rem;
-            display: grid;
-            padding-top: 1vh;
-            padding-bottom: 1vh;
-        }
-
-        td {
-            display: table-row;
-            margin-left: 10px;
-            margin-right: 10px;
-        }
-
-
-        span {
-            display: flex;
-            justify-content: center;
-        }
-
-        div.notes>p {
-            font-size: 1rem;
-            color: #c7c7c7;
-        }
-
-        #typing {
-            color: red;
-            font-size: 2rem;
-        }
-    </style>
+    </script>
 </head>
 
 <body>
     <h1>Settings</h1>
 
     <span id="table"></span>
+    
+    <div>
+        <label for="playerColor">Select your color: </label>
+        <input type="color" name="playerColor" id="playerColor" onchange="changecolor()">
+    </div>
+
     <div class="notes">
         <p> Use [ARROW KEYS] to move up and down the menu or use your mouse </p>
         <p> Press [Enter] or [Left Mouse Button] and a key to change the keybind or [ESCAPE] to reset to defaults</p>
@@ -65,13 +35,14 @@
         <p id="typing" hidden> NOW PRESS A BUTTON TO SET SETTING OR PRESS [ESCAPE] TO RESET </p>
     </div>
     <script type="module" defer>
-        import { defaults, setDefaults } from './scripts/inputHandler.js';
+        import { defaults, setDefaults, areSettingsSet } from './scripts/inputHandler.js';
         import { setMusic, setMusicTime } from './scripts/sound.js';
 
 
         setMusic();
         setMusicTime(parseFloat(localStorage.musicTime));
-        if (!localStorage.length) setDefaults();
+        // if (localStorage.length < 8) setDefaults();
+        areSettingsSet();
         console.log(defaults);
         /**
         * TODO: now make sure there can't be multiple settings of the same key (up and down is 'w' for example)
