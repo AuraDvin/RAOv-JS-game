@@ -3,6 +3,8 @@ import { bulletCollision } from './bullet.js';
 
 const enemyTypes = ['fast', 'strong'/*, 'ranged'*/];
 let lastId = 0;
+let lastSpawn = 0;
+let mobSpawnDelay = 350;
 
 class Enemy {
   id;
@@ -145,9 +147,13 @@ let mobs = [];
  * TODO: add score after killing enemies :D
  */
 
-export function spawnMobs() {
+export function spawnMobs(timestamp) {
+
+  if (timestamp - lastSpawn < mobSpawnDelay) return;
+
+  lastSpawn = timestamp;
   const type = Math.floor(Math.random() * (enemyTypes.length - 1));
-  
+
   const spawnPosition = {
     x: Math.floor(Math.random() * 7680),
     y: Math.floor(Math.random() * 4320)
@@ -157,7 +163,6 @@ export function spawnMobs() {
   lastId++;
 
   mobs.push(newMob);
-  let t = setTimeout(spawnMobs, 350);
 }
 
 export function updateMobs(progress) {

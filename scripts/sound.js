@@ -1,6 +1,7 @@
-let volume = parseInt(localStorage.getItem('volume'));
+let volume = parseInt(localStorage.volume);
 let music = document.createElement('audio');
 let m_timestamp = 0;
+
 export function setMusic() {
     if (!isNaN(volume) && volume > 0 && volume < 100) {
         music.volume = parseInt(volume) * 0.01;
@@ -19,41 +20,42 @@ export function setMusic() {
     music.play();
 }
 
-export function isMusicMuted(){
+export function isMusicMuted() {
     return music.paused;
 }
 
 export function muteMusic(timestamp) {
-    if (timestamp - m_timestamp >= 200) {
-        m_timestamp = timestamp;
-        if (music.paused) {
-            music.play();
-            console.log('music playing at', music.currentTime);
-        } else {
-            music.pause();
-            console.log('music paused at', music.currentTime);
-        }
+    if (timestamp - m_timestamp < 200) return;
+    m_timestamp = timestamp;
+
+    if (music.paused) {
+        music.play();
+        console.log('music playing at', music.currentTime);
+    } else {
+        music.pause();
+        console.log('music paused at', music.currentTime);
     }
 }
 
 export function lowerMusic() {
     localStorage.volume = parseInt(localStorage.volume) - 10;
-    music.volume = parseInt(localStorage.volume) * 0.01;
     if (parseInt(localStorage.volume) <= 0) {
         localStorage.volume = '0';
         music.volume = 0;
+        return;
     }
+    music.volume = parseInt(localStorage.volume) * 0.01;
 
 }
 
 export function higherMusic() {
     localStorage.volume = parseInt(localStorage.volume) + 10;
-    music.volume = parseInt(localStorage.volume) * 0.01;
     if (parseInt(localStorage.volume) >= 40) {
         localStorage.volume = '40';
         music.volume = 0.4;
+        return;
     }
-    console.log();
+    music.volume = parseInt(localStorage.volume) * 0.01;
 }
 
 export function getMusicTime() {

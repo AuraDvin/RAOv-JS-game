@@ -49,18 +49,6 @@ export async function KeysHandler(event) {
         if (key == 'escape') {
             changePause();
         }
-        if (key == localStorage.vmute) {
-            muteMusic(g_timestamp);
-            console.log('muted');
-        }
-        if (key == localStorage.vup) {
-            higherMusic();
-            console.log('increased');
-        }
-        if (key == localStorage.vdown) {
-            lowerMusic();
-            console.log('decreased');
-        }
     }
 
 }

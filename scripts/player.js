@@ -1,6 +1,6 @@
 import { KeysPressed } from './inputHandler.js';
-import { update_health } from './ui.js';
 import { fireBullet, updateBullets, drawBullets } from './bullet.js';
+import { update_ui_health } from './ui.js';
 
 let limit = {
   x: 7680,
@@ -27,7 +27,7 @@ export class Player {
     this.#sprite.src = img;
     this.#position = { x: Math.floor(1920 / 2 - (this.#sprite.width / 2)), y: Math.floor(1080 / 2 - (this.#sprite.height / 2)) };
     this.speed = 2;
-    this.diagSpeed = Math.floor(this.speed * Math.sqrt(0.5)); // This just makes it so we move diagonally at this.speed
+    this.diagSpeed = Math.floor(this.speed * Math.sqrt(0.5)); 
     this.#shootCoolDown = 100;
     this.#color = localStorage.color ? localStorage.color : 'salmon';
     this.#shootTimer = 0;
@@ -114,10 +114,8 @@ export class Player {
   #takeDamage(source) {
     // console.log(this.#health);
     this.#health -= source.damage;
-    if (this.#health < 0)
-      this.die();
-    // console.log('died');
-    update_health(this.#health);
+    if (this.#health < 0) this.die();
+    update_ui_health(this.#health);
   }
 
   draw(ctx) {

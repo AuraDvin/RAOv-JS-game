@@ -1,25 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="A game running in canvas tag of HTML5 that mimics the original zombs.io game">
   <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
-
   <title>Zombsio Recreation</title>
-  
+
   <!--. SCRIPT LINKS   -->
   <script src="/scripts/game.js" defer type="module"></script>
   <script src="./scripts/ui.js" defer type="module"></script>
   <script src="./scripts/bg.js" defer type="module"></script>
-  
+
   <!--. CSS LINKS   -->
+  <link rel="stylesheet" href="./styles/ui.css">
   <link rel="stylesheet" href="./styles/canvas.css" />
   <link rel="stylesheet" href="./styles/body.css" />
 </head>
+
 <body>
+  <div class="ui">
+    <p class="fps prevent-select" id="fps"></p>
+    <p class="health prevent-select" id="health"></p>
+  </div>
+
+  <p class="paused prevent-select" hidden id="paused"> PAUSED </p>
+  <p class="muted prevent-select" id="muted" hidden> Song muted </p>
+
   <canvas id="ui"></canvas>
+
+
   <canvas id="player"></canvas>
   <canvas id="background"></canvas>
 </body>
+
 </html>
