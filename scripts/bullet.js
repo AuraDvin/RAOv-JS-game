@@ -29,11 +29,10 @@ class Bullet {
     constructor(id, speed, direction = { x: Number, y: Number }) {
         this.#position.x = player.getPosition().x + player.getSprite().width * 0.5;
         this.#position.y = player.getPosition().y + player.getSprite().height * 0.5;
-
         this.id = id;
         this.#speed = speed;
         this.startDirection = { x: direction.x, y: direction.y };
-        // console.log(this);
+
         this.#livingTime = 0;
     }
     
@@ -97,11 +96,8 @@ class Bullet {
     
     
     draw(ctx) {
-        // debugger;
-        // console.log(ctx);
-        // console.table(this.#position.x, this.#position.y, this.#size.width, this.#size.height);
-        // debugger;
         ctx.fillStyle = this.#style;
+
         ctx.beginPath();
         ctx.lineTo(this.#position.x, this.#position.y);
         ctx.lineTo(this.#position.x + this.#size.width, this.#position.y);
@@ -117,11 +113,15 @@ let bulletArray = [];
 let lastId = 0;
 
 export function getMousePosition(e) {
-    const halfCanvasWidth = 1920 * 0.5;
-    const halfCanvasHeight = 1080 * 0.5;
+    const halfCanvasWidth = document.getElementById('player').clientWidth * 0.5;
+    const halfCanvasHeight = document.getElementById('player').clientHeight * 0.5;
+    const halfPlayerWidth = player.getSprite().width * 0.5;
+    const halfPlayerHeight = player.getSprite().height * 0.5;
+    const playerX = player.getPosition().x;
+    const playerY = player.getPosition().y;
 
-    mouse.x = (e.pageX - halfCanvasWidth) + player.getPosition().x + player.getSprite().width * 0.5;
-    mouse.y = (e.pageY - halfCanvasHeight) + player.getPosition().y + player.getSprite().height * 0.5; 
+    mouse.x = (e.pageX - halfCanvasWidth) + playerX + halfPlayerWidth;
+    mouse.y = (e.pageY - halfCanvasHeight) + playerY + halfPlayerHeight; 
 }
 
 export function fireBullet() {
@@ -143,19 +143,18 @@ export function updateBullets(progress) {
 }
 
 export function bulletCollision(progress, mob) {
-    // console.log(mob);
     if (!bulletArray.length) return;
+
     for (let i in bulletArray) {
         if (bulletArray[i].AABB(mob.collisionRect)) {
             mob.dealDamage(bulletArray[i]);
             removeFromList(bulletArray[i].id);
+            
         }
     }
 }
 
 export function drawBullets(ctx) {
-    // console.log('ctx: ', ctx);
-    // console.log(bulletArray);
     if (!bulletArray.length) return;
     for (let i in bulletArray) {
         bulletArray[i].draw(ctx);

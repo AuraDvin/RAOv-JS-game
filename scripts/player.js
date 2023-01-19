@@ -16,6 +16,7 @@ export class Player {
   #color = String();
   #shootCoolDown = Number();
   #shootTimer = Number();
+  #score = Number();
   speed = Number();
   diagSpeed = Number();
 
@@ -23,11 +24,12 @@ export class Player {
   constructor(img = String, name = String) {
     this.#name = name;
     this.#health = 100;
+    this.#score = 0;
     this.#sprite = new Image(256, 256);
     this.#sprite.src = img;
     this.#position = { x: Math.floor(1920 / 2 - (this.#sprite.width / 2)), y: Math.floor(1080 / 2 - (this.#sprite.height / 2)) };
     this.speed = 2;
-    this.diagSpeed = Math.floor(this.speed * Math.sqrt(0.5)); 
+    this.diagSpeed = Math.floor(this.speed * Math.sqrt(0.5));
     this.#shootCoolDown = 100;
     this.#color = localStorage.color ? localStorage.color : 'salmon';
     this.#shootTimer = 0;
@@ -79,11 +81,11 @@ export class Player {
     this.move(move);
 
     this.#shootTimer += progress;
-    if (KeysPressed[localStorage.shoot]){
-      if (this.#shootTimer >= this.#shootCoolDown){
+    if (KeysPressed[localStorage.shoot]) {
+      if (this.#shootTimer >= this.#shootCoolDown) {
         console.log('user shot');
         this.#shootTimer = 0;
-        fireBullet();        
+        fireBullet();
       }
     }
     updateBullets(progress);
@@ -117,6 +119,10 @@ export class Player {
     if (this.#health < 0) this.die();
     update_ui_health(this.#health);
   }
+
+
+  increaseScore() { this.#score++; }
+  getScore() { return this.#score; }
 
   draw(ctx) {
     ctx.fillStyle = this.#color;

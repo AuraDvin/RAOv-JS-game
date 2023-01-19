@@ -1,4 +1,4 @@
-import { changePause, g_timestamp } from "./game.js";
+import { changePause } from "./game.js";
 import { resetZoom } from "./zoomHandle.js";
 import { muteMusic, lowerMusic, higherMusic } from './sound.js';
 export let KeysPressed = {};

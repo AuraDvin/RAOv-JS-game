@@ -1,10 +1,12 @@
 import { isRunning } from "./game.js";
 import { isMusicMuted } from './sound.js';
+import { player } from "./game.js";
 
 let fps;
 let health = 100;
 let documentFPSp;
 let documentHEALTHp;
+let documentSCOREp;
 let fpsUpdate = 0;
 let pauseText;
 let mutedText;
@@ -14,7 +16,8 @@ export function init_ui() {
     documentHEALTHp = document.getElementById('health');
     pauseText = document.getElementById('paused');
     mutedText = document.getElementById('muted');
-    return !(!documentFPSp || !documentHEALTHp || !pauseText || !mutedText);
+    documentSCOREp = document.getElementById('score');
+    return !(!documentFPSp || !documentHEALTHp || !pauseText || !mutedText || !documentSCOREp);
 }
 
 export function update_ui(progress) {
@@ -27,6 +30,7 @@ export function update_ui(progress) {
     // health = player.getHealth();
     documentFPSp.innerHTML = `fps: ${fps}`;
     documentHEALTHp.innerHTML = `health: ${health}`;
+    documentSCOREp.innerHTML = `Kills: ${player.getScore()}`;
     pauseText.hidden = isRunning;
     mutedText.hidden = !isMusicMuted();
 }

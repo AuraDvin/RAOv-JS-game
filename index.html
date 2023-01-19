@@ -5,186 +5,23 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A menu screen of a game running in canvas tag of HTML5">
-    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
-    <title>Menu Screen</title>
-    <link rel="stylesheet" href="./styles/body.css">
-    <link rel="stylesheet" href="./styles/canvas.css">
-    <style>
-        body {
-            background-color: #2f2f2f;
-        }
-    </style>
-
+    <title>Document</title>
+    <script src="./scripts/username.js"></script>
+    <script src="./scripts/index.js"></script>
+    <link rel="stylesheet" href="./styles/index.css">
 </head>
-<!-- <audio src="#"></audio> -->
 
-<body>
-    <canvas id="myCanvas" width="1920" height="1080"></canvas>
-    <script type='module' defer>
-        import { Menu } from './scripts/Menu.js';
-        import { setMusic, muteMusic, lowerMusic, higherMusic, getMusicTime } from './scripts/sound.js';
-        import { setDefaults } from './scripts/inputHandler.js';
-        
-        const canvas = document.getElementById('myCanvas');
-        /** @type {CanvasRenderingContext2D} */
-        const ctx = canvas.getContext('2d');
-        const font = '42px sans-serif';
-        ctx.font = font;
-        
-        let username = "";
-        let pressedKeys = {};
-        let lastFrame = 0;
-        let updateId = setInterval(window.requestAnimationFrame, 32, update);
-        let menu = new Menu(['User', 'Start', 'Options']);
-        menu.selectDown();
+<body onload="setPreset()">
+    <h1 class="prevent-select">Zombsio <b>recreation</b> </h1>
+    <div class="table" id="table">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" oninput="changeUserName()"
+            placeholder="Type your username here" pattern="/[a-z]+/" maxlength="12" autofocus />
+    </div>
+    <div class="notes">
+        <p hidden id="usernameNote">Only allowed charaters are letters (a-z or A-Z), numbers, space and "-" or "_".</p>
+    </div>
 
-        function updateMenu(timestamp) {
-            if (menu.getSelectedItem() != 0) {
-                if (pressedKeys['m'])
-                    muteMusic(timestamp);
-                if (pressedKeys['-']) {
-                    lowerMusic();
-                }
-                if (pressedKeys['+']) {
-                    higherMusic();
-                }
-            }
-            if (username.length != 0) {
-                menu.options[0].string = username;
-            } else {
-                menu.options[0].string = 'Type here!';
-            }
-
-            if ((pressedKeys['arrowup']) && !menu.moved) {
-                menu.moved = true;
-                menu.timestamp = timestamp;
-                menu.selectUp();
-                return;
-            }
-            if ((pressedKeys['arrowdown']) && !menu.moved) {
-                menu.moved = true;
-                menu.timestamp = timestamp;
-                menu.selectDown();
-                return;
-            }
-            if (menu.moved && timestamp - menu.timestamp >= 100) {
-                menu.moved = false;
-                return;
-            }
-            if (pressedKeys['enter']) {
-                menu.options.forEach(e => {
-                    if (e.checked) {
-                        switch (e.place) {
-                            case 0:
-                                localStorage.setItem('username', username);
-                                break;
-                            case 1:
-                                localStorage.setItem('username', username);
-                                localStorage.setItem('musicTime', getMusicTime());
-                                window.location.href = './game.html';
-                                break;
-                            case 2:
-                                window.location.href = './settingsAlpha.html';
-                                break;
-                        }
-                    }
-
-                });
-            }
-        }
-
-        document.body.onload = () => {
-            if (!localStorage.length) { setDefaults(); }
-            username = localStorage.getItem('username') ? localStorage.getItem('username') : '';
-        }
-        addEventListener('keyup', handleKey, false);
-        addEventListener('keydown', handleKey, false);
-        setMusic();
-
-
-        function handleKey(event) {
-            pressedKeys[event.key.toLowerCase()] = event.type == 'keydown';
-            const key = event.key.toLowerCase();
-
-            if (menu.getSelectedItem() === 0 && pressedKeys[key.toLowerCase()]) {
-                if (
-                    (key.length == 1) && (
-                        (key >= 'a' && key <= 'z') ||
-                        (key >= '0' && key <= '9') ||
-                        ([' ', '-', '_'].includes(key))
-                    ) || (
-                        key == 'backspace'
-                    )
-                ) {
-                    handleUsername(key);
-                    updateUsername();
-                }
-            }
-        }
-
-        function handleUsername(key) {
-            if (key != 'backspace' && username.length > 12) {
-
-                return;
-            }
-            if (key == 'backspace') {
-                username = username.substring(0, username.length - 1);
-
-                return;
-            }
-            username += key;
-
-            return;
-
-        }
-
-        function updateUsername() {
-            if (username.length > 0)
-                localStorage.setItem('username', username);
-            else
-                localStorage.setItem('username', 'no username');
-        }
-
-
-        // <!--! update -->
-        function update(timestamp) {
-            let progress = timestamp - lastFrame;
-            lastFrame = timestamp;
-
-            updateMenu(timestamp);
-            draw();
-        }
-
-        function draw() {
-            ctx.fillStyle = 'white';
-
-            const windowWidth = 1920 * 0.5;
-            const start = 120;
-            const usernameWidth = ctx.measureText(menu.options[0].string).width;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            menu.options.forEach(e => {
-                ctx.fillText(e.string, windowWidth, start + 10 + e.place * 42);
-                if (e.checked) {
-                    ctx.lineWidth = 6;
-                    ctx.strokeStyle = '#F2F2F2';
-
-                    ctx.beginPath();
-                    ctx.moveTo(windowWidth - 10, start + e.place * 42);
-                    ctx.lineTo(windowWidth - 20, start + e.place * 42);
-                    ctx.stroke();
-
-                }
-                if (e.place == 0) {
-                    ctx.fillRect(windowWidth, start + 14, usernameWidth, 2);
-                }
-
-            });
-        }
-
-    </script>
 </body>
 
 </html>
