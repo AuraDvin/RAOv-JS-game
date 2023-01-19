@@ -1,42 +1,40 @@
-let ui_canvas;
-/** @type {CanvasRenderingContext2D} */
-let ui_ctx;
-let updates = 0;
-let fps = 1;
-let timeElapsed = 0;
+import { isRunning } from "./game.js";
+import { isMusicMuted } from './sound.js';
+import { player } from "./game.js";
+
+let fps;
 let health = 100;
-let colors = {
-  'fps' : '#2f2f2f',
-  'health' : '#ff0000'
-};
+let documentFPSp;
+let documentHEALTHp;
+let documentSCOREp;
+let fpsUpdate = 0;
+let pauseText;
+let mutedText;
 
-export function ui_setup() {
-  ui_canvas = document.getElementById('ui');
-  ui_canvas.width = 1920;
-  ui_canvas.height = 1080;
-
-  ui_ctx = ui_canvas.getContext('2d');
-  ui_ctx.font = '42px Sans-serif';
+export function init_ui() {
+    documentFPSp = document.getElementById('fps');
+    documentHEALTHp = document.getElementById('health');
+    pauseText = document.getElementById('paused');
+    mutedText = document.getElementById('muted');
+    documentSCOREp = document.getElementById('score');
+    return !(!documentFPSp || !documentHEALTHp || !pauseText || !mutedText || !documentSCOREp);
 }
 
-export function update_health(newHealth) {
-  health = newHealth;
+export function update_ui(progress) {
+
+    fpsUpdate += progress
+    if (fpsUpdate > 500) {
+        fps = ~~(1000 / progress);
+        fpsUpdate = 0;
+    }
+    // health = player.getHealth();
+    documentFPSp.innerHTML = `fps: ${fps}`;
+    documentHEALTHp.innerHTML = `health: ${health}`;
+    documentSCOREp.innerHTML = `Kills: ${player.getScore()}`;
+    pauseText.hidden = isRunning;
+    mutedText.hidden = !isMusicMuted();
 }
 
-export function ui_update(progress) {
-  timeElapsed += progress;
-  updates++;
-  if (timeElapsed >= 1000) {
-    fps = Math.floor(updates * 1000 / timeElapsed).toString() + ' ups ' + Math.floor(1000 / progress) + ' fps'; // updates per second and frames per second
-    updates = 0;
-    timeElapsed = 0;
-  }
-}
-
-export function ui_draw() {
-  ui_ctx.clearRect(0, 0, ui_canvas.width, ui_canvas.height);
-  ui_ctx.fillStyle = colors['fps'];
-  ui_ctx.fillText(fps, 0, 42);
-  ui_ctx.fillStyle = colors['health'];
-  ui_ctx.fillText(health.toString() + ' health', 0, 84);
+export function update_ui_health(newHealth) {
+    health = newHealth;
 }

@@ -25,7 +25,7 @@
 
 1. [ ] Create tools to get wood and rocks 🥫
 
-1. [ ] Make <b>enemies</b> 🟥
+1. [x] ~~Make <b>enemies</b>~~ 🟥
 
 1. [ ] Make UI 🟥
     - [x] ~~Health~~
@@ -38,7 +38,7 @@
 
 1. [ ] Create <b><u>placable</u></b> buildings 🥫
 
-1. [ ] Enemies attack buildings (not player) 🥫
+1. [ ] ~~Enemies attack buildings (not player)~~ 🥫
 
 1. [ ] Buildings are upgradable/sellable 🥫
 
@@ -51,9 +51,4 @@
 1. [ ] Automatic Harvesters 🥫
     - Auto Collects Resource like wood or rock for money
 
-🥫 no longer intended for inital release
-🟥 urgnet
-🟧 Important
-🟨 Not Required
-
-I decided to cut some stuff out because i am running out of time with the 🥫 tag. But I might still add that after due date has passed.
+🥫 no longer intended for inital release <br/> 🟥 urgnet <br/> 🟧 Important <br/> 🟨 Not Required <br/> I decided to cut some stuff out because i am running out of time with the 🥫 tag. But I might still add that after due date has passed.

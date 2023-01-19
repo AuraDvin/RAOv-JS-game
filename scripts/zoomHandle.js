@@ -2,17 +2,16 @@ import { view } from './game.js';
 
 const MAX_ZOOM = 2;
 const MIN_ZOOM = 0.4;
-const SCROLL_SENSITIVITY = 0.0005
+const SCROLL_SENSITIVITY = 0.0005;
 
 let canvasZoom = 1;
-let cameraZoom = 1;
+
 
 //! beta feature (now it just needs to scale from the center not the top left :P)
 export function scaleHandler(event) {
-  cameraZoom = 1;
-  cameraZoom -= event.deltaY * SCROLL_SENSITIVITY;
-  cameraZoom = Math.max(Math.min(cameraZoom, MAX_ZOOM), MIN_ZOOM);
-
+  let cameraZoom = 1;
+  // cameraZoom -= event.deltaY * SCROLL_SENSITIVITY;
+  cameraZoom = Math.max(Math.min(cameraZoom - event.deltaY * SCROLL_SENSITIVITY, MAX_ZOOM), MIN_ZOOM);
   canvasZoom *= cameraZoom;
 
   if (canvasZoom > 5) {
@@ -25,7 +24,6 @@ export function scaleHandler(event) {
     view[0] *= cameraZoom;
     view[3] *= cameraZoom;
   }
-
 }
 
 export async function resetZoom() {

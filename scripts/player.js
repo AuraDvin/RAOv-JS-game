@@ -1,5 +1,7 @@
 import { KeysPressed } from './inputHandler.js';
-import { update_health } from './ui.js';
+import { fireBullet, updateBullets, drawBullets } from './bullet.js';
+import { update_ui_health } from './ui.js';
+
 let limit = {
   x: 7680,
   y: 4320
@@ -12,19 +14,26 @@ export class Player {
   #position = { x: Number(), y: Number() };
   #immunityFrames = 300;
   #color = String();
+  #shootCoolDown = Number();
+  #shootTimer = Number();
+  #score = Number();
   speed = Number();
   diagSpeed = Number();
 
-  constructor(img = String, name = String, color = String) {
+
+  constructor(img = String, name = String) {
     this.#name = name;
     this.#health = 100;
+    this.#score = 0;
     this.#sprite = new Image(256, 256);
     this.#sprite.src = img;
     this.#position = { x: Math.floor(1920 / 2 - (this.#sprite.width / 2)), y: Math.floor(1080 / 2 - (this.#sprite.height / 2)) };
     this.speed = 2;
-    this.diagSpeed = Math.floor(this.speed * Math.sqrt(0.5)); // This just makes it so we move diagonally at this.speed
-    this.#color = 'salmon';
-    console.log(this);
+    this.diagSpeed = Math.floor(this.speed * Math.sqrt(0.5));
+    this.#shootCoolDown = 100;
+    this.#color = localStorage.color ? localStorage.color : 'salmon';
+    this.#shootTimer = 0;
+    // console.log(this);
   }
 
   // The bounds are going to change depending on the level size (not decided yet)
@@ -33,11 +42,12 @@ export class Player {
     this.#position.y = Math.min(Math.max(this.#position.y, 0), limit.y - this.#sprite.height);
   }
 
-  #checkDamage(progress, source) {
+  checkDamage(progress, source) {
+    // console.log('test');
     this.#immunityFrames -= progress;
     if (this.#immunityFrames <= 0) {
       this.#immunityFrames = 300;
-      this.takeDamage(source);
+      this.#takeDamage(source);
       return true;
     }
     return false;
@@ -49,15 +59,15 @@ export class Player {
       y: 0
     }
     //. Up is negative, down is positive (origin in topleft)
-    if (KeysPressed['w'] || KeysPressed['arrowup']) {
+    if (KeysPressed[localStorage.up]) {
       move.y = -this.speed;
-    } else if (KeysPressed['s'] || KeysPressed['arrowdown']) {
+    } else if (KeysPressed[localStorage.down]) {
       move.y = this.speed;
     }
 
-    if (KeysPressed['d'] || KeysPressed['arrowright']) {
+    if (KeysPressed[localStorage.right]) {
       move.x = this.speed;
-    } else if (KeysPressed['a'] || KeysPressed['arrowleft']) {
+    } else if (KeysPressed[localStorage.left]) {
       move.x = -this.speed;
     }
 
@@ -70,11 +80,15 @@ export class Player {
 
     this.move(move);
 
-
-
-    if (KeysPressed['t']) {
-      // this.#checkDamage(progress, { damage: 10 });
+    this.#shootTimer += progress;
+    if (KeysPressed[localStorage.shoot]) {
+      if (this.#shootTimer >= this.#shootCoolDown) {
+        console.log('user shot');
+        this.#shootTimer = 0;
+        fireBullet();
+      }
     }
+    updateBullets(progress);
 
   }
 
@@ -99,14 +113,16 @@ export class Player {
     window.location.replace('/index.html');
   }
 
-  takeDamage(source) {
-    console.log(this.#health);
+  #takeDamage(source) {
+    // console.log(this.#health);
     this.#health -= source.damage;
-    if (this.#health < 0)
-      this.die();
-    console.log('died');
-    update_health(this.#health);
+    if (this.#health < 0) this.die();
+    update_ui_health(this.#health);
   }
+
+
+  increaseScore() { this.#score++; }
+  getScore() { return this.#score; }
 
   draw(ctx) {
     ctx.fillStyle = this.#color;
@@ -119,5 +135,7 @@ export class Player {
     ctx.fillStyle = 'Black';
     ctx.fillText(this.#name, this.#position.x + this.#sprite.width * 0.5 - ctx.measureText(this.#name).width * 0.5, this.#position.y + 100);
     ctx.font = '30px Tahoma';
+
+    drawBullets(ctx);
   }
 }
