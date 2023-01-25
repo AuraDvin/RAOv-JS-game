@@ -57,26 +57,33 @@ async function loop(timestamp) {
   lastRender = timestamp;
 
   update_ui(progress);
-  update(progress);
   if (isRunning) {
     g_timestamp += progress;
 
-    player.update(progress);
-    spawnMobs(g_timestamp);
-    bg_update(progress);
-    updateMobs(progress);
-    
+    if (KeysPressed[localStorage.vdown]) {
+      lowerMusic();
+    }
+    if (KeysPressed[localStorage.vup]) {
+      higherMusic();
+    }
+
+    update(progress);
+
     if (KeysPressed[localStorage.vmute]) {
       muteMusic(timestamp);
     }
-
-  } else {
+    draw();
+  }
+  else {
     if (!isMusicMuted()) {
       muteMusic(timestamp);
     }
+
+    if (KeysPressed['backspace']) {
+      window.location.href = './settingsAlpha.html';
+    }
   }
 
-  draw();
   window.requestAnimationFrame(loop);
 }
 
@@ -92,23 +99,23 @@ export function changePause() {
 }
 
 async function update(progress) {
-  if (!isRunning) {
-    if (KeysPressed['backspace']) {
-      window.location.href = './settingsAlpha.html';
-    }
-    return;
-  }
+  player.update(progress);
+  spawnMobs(g_timestamp);
+  bg_update(progress);
+  updateMobs(progress);
+  view[4] = -player.getPosition().x
+    + canvas.width * 0.5
+    - player.getSprite().width * 0.5;
 
-  if (KeysPressed[localStorage.vdown]) {
-    lowerMusic();
-  }
-  if (KeysPressed[localStorage.vup]) {
-    higherMusic();
-  }
-  // Transform context to allow the player character to stay in the middle of the viewport
-  // While actually being able to move around the map (without the map moving instead :D)
-  view[4] = -player.getPosition().x + canvas.width * 0.5 - player.getSprite().width * 0.5;
-  view[5] = -player.getPosition().y + canvas.height * 0.5 - player.getSprite().height * 0.5;
+
+  view[5] = -player.getPosition().y
+    + canvas.height * 0.5
+    - player.getSprite().height * 0.5;
+
 
   ctx.setTransform(view[0], view[1], view[2], view[3], view[4], view[5]);
+
+  // Transform context to allow the player character to stay in the middle of the viewport
+  // While actually being able to move around the map (without the map moving instead :D)
 }
+

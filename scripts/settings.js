@@ -12,7 +12,7 @@ setMusic();
 setMusicTime(parseFloat(localStorage.musicTime));
 // if (localStorage.length < 8) setDefaults();
 areSettingsSet();
-console.log(defaults);
+// console.log(defaults);
 /**
 * TODO: now make sure there can't be multiple settings of the same key (up and down is 'w' for example)
 */
@@ -70,7 +70,7 @@ function setnew(key) {
     let lePreSetting = table.children[getSelected()].innerHTML.split(' ');
     lePreSetting[1] = lePreSetting[1].split(":")[0];
     const leSetting = lePreSetting;
-    console.log(leSetting);
+    // console.log(leSetting);
     switch (leSetting[0]) {
         case 'move':
             if (key === 'escape') {
@@ -99,7 +99,7 @@ function setnew(key) {
 
 function clickEvent() {
     allowInput = false;
-    inputDelay = setTimeout(() => { console.log('test'); allowInput = true; }, 10000); // after 10s set allowInput to true
+    inputDelay = setTimeout(() => { /*console.log('test');*/ allowInput = true; }, 10000); // after 10s set allowInput to true
 }
 
 function getSelected() {

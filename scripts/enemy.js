@@ -13,7 +13,8 @@ class Enemy {
   #speed = Number;
   #diagSpeed = Number;
   damage = Number;
-  isMoving = Boolean;
+  #takingDamage = Boolean;
+  #damageInterval;
   goToPosition = { x: Number, y: Number };
   direction = { x: Number, y: Number };
   #position = { x: Number, y: Number };
@@ -21,7 +22,7 @@ class Enemy {
 
 
   constructor(type, spawnPosition, id) {
-    this.isMoving = true;
+    this.#takingDamage = false;
     this.id = id;
     this.#sprite = new Image(256, 256);
     switch (type) {
@@ -69,6 +70,9 @@ class Enemy {
     return this.#sprite;
   }
 
+  notTakingDamageNow() {
+    this.#takingDamage = false;
+  }
 
   getPosition() {
     return { x: this.#position.x, y: this.#position.y };
@@ -80,7 +84,6 @@ class Enemy {
   }
 
   move(vector2) {
-    if (!this.isMoving) return;
     this.#position.x += vector2.x;
     this.#position.y += vector2.y;
     this.#checkInBounds();
@@ -93,6 +96,10 @@ class Enemy {
   }
 
   dealDamage(source) {
+    this.#takingDamage = true;
+    if (!this.#damageInterval)
+      this.#damageInterval = setInterval((mob) => { mob.notTakingDamageNow(); }, 200, this);
+
     this.#health -= source.damage;
     if (this.#health <= 0) {
       this.die();
@@ -118,13 +125,22 @@ class Enemy {
     return false;
   }
 
+  draw(ctx) {
+    ctx.drawImage(this.getSprite(), this.#position.x, this.#position.y);
+    if (this.#takingDamage) { // is taking damage
+      ctx.fillStyle = `rgba(255,0,0,0.4)`;
+      ctx.beginPath();
+      ctx.arc(this.#position.x + this.#sprite.width * 0.5, this.#position.y + this.#sprite.height * 0.5, this.#sprite.width * 0.5, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+  }
 }
 
 let mobs = [];
 
-/**TODO 
+/**
  * TODO: set spawn position to anywhere **OUTSIDE** the viewport 
- * TODO: add score after killing enemies :D
+ * ? collision bug?
  */
 
 export function spawnMobs(timestamp) {
@@ -132,7 +148,7 @@ export function spawnMobs(timestamp) {
   const moment = timestamp / 6000;
   if (timestamp - lastSpawn < 3000) return;
   mobSpawnDelay = ~~(mobSpawnDelay - moment);
-  console.log(mobSpawnDelay);
+  // console.log(mobSpawnDelay);
   if (mobSpawnDelay <= 350) mobSpawnDelay = 350;
 
   lastSpawn = timestamp;
@@ -147,41 +163,68 @@ export function spawnMobs(timestamp) {
   lastId++;
 
   mobs.push(newMob);
-  console.log('amount of spawned mobs: ', mobs.length);
+  // console.log(`Current number of mobs: ${mobs.length}`);
   return;
 }
 
 export function updateMobs(progress) {
   for (let i in mobs) {
     i = Number(i);
-    // for (let j in mobs) {
-    //   if (j != i) {
-    //     if (mobs[i].AABB(mobs[j])) {
-    //       const positionDifference = {
-    //         x: -1 * (mobs[i].getPosition().x - mobs[j].getPosition().x),
-    //         y: -1 * (mobs[i].getPosition().y - mobs[j].getPosition().y),
-    //       };
-    //       console.log(positionDifference);
-    //       mobs[j].move(positionDifference);
-    //     }
-    //   }
-    // }
     mobs[i].pathfind();
-    mobs[i].move({ x: mobs[i].direction.x * progress / 100, y: mobs[i].direction.y * progress / 100 });
+    mobs[i].move({ x: mobs[i].direction.x * progress * 0.01, y: mobs[i].direction.y * progress * 0.01 });
+    for (let j = i + 1; j < mobs.length; j++) {
+      if (mobs[j]) {
+        const mobDiameter = mobs[i].getSprite().width + 5;
+
+        const positionOne = {
+          x: mobs[i].getPosition().x + mobs[i].getSprite().width * 0.5,
+          y: mobs[i].getPosition().y + mobs[i].getSprite().height * 0.5
+        };
+
+        const positionTwo = {
+          x: mobs[j].getPosition().x + mobs[j].getSprite().width * 0.5,
+          y: mobs[j].getPosition().y + mobs[j].getSprite().height * 0.5
+        };
+
+
+        const positionDifference = {
+          x: positionOne.x - positionTwo.x,
+          y: positionOne.y - positionTwo.y,
+        };
+
+        const distance = Math.hypot(positionDifference.x, positionDifference.y);
+
+        
+        if (distance < mobDiameter) {
+          // console.log(`Mob ${mobs[i].id} and ${mobs[j].id}\nat distance: ${distance}`);
+
+          const forceOne = {
+            x: Math.sign(positionDifference.x) * (mobDiameter - Math.abs(positionDifference.x)) * progress * 0.001,
+            y: Math.sign(positionDifference.y) * (mobDiameter - Math.abs(positionDifference.y)) * progress * 0.001
+          };
+
+          const forceTwo = {
+            x: -Math.sign(positionDifference.x) * (mobDiameter - Math.abs(positionDifference.x)) * progress * 0.001,
+            y: -Math.sign(positionDifference.y) * (mobDiameter - Math.abs(positionDifference.y)) * progress * 0.001
+          };
+
+          mobs[i].move(forceOne);
+          mobs[j].move(forceTwo);
+        }
+      }
+    }
   }
   if (mobs.length > 50) {                   // make sure to only have 50 at once 
     while (mobs.length > 50) {
       mobs.pop();
     }
   }
-
-
   checkCollision(player, progress);
 }
 
 export function drawMobs(ctx) {
   for (let i in mobs) {
-    ctx.drawImage(mobs[i].getSprite(), mobs[i].getPosition().x, mobs[i].getPosition().y);
+    mobs[i].draw(ctx);
   }
 }
 
@@ -198,15 +241,7 @@ function removeFromList(defeatedEnemyId) {
 function checkCollision(player, progress) {
   for (let i in mobs) {
     // console.log(mobs[i].collisionRect, player.getPosition(), player.getSprite().width, player.getSprite().height);
-    if (mobs[i].AABB(player)) {
-      // console.log('collided');
-      player.checkDamage(progress, mobs[i]);
-    }
-    try {
-      bulletCollision(progress, mobs[i]);
-    } catch (err) {
-      console.log(mobs[i]);
-      console.error('moment of moments');
-    }
+    if (mobs[i].AABB(player)) { player.checkDamage(progress, mobs[i]); }
+    bulletCollision(progress, mobs[i]);
   }
 }

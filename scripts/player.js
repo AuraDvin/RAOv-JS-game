@@ -2,7 +2,7 @@ import { KeysPressed } from './inputHandler.js';
 import { fireBullet, updateBullets, drawBullets } from './bullet.js';
 import { update_ui_health } from './ui.js';
 
-let limit = {
+const limit = {
   x: 7680,
   y: 4320
 };
@@ -17,11 +17,12 @@ export class Player {
   #shootCoolDown = Number();
   #shootTimer = Number();
   #score = Number();
+  #damageWasTaken = Boolean;
   speed = Number();
   diagSpeed = Number();
 
-
   constructor(img = String, name = String) {
+    this.#damageWasTaken = false;
     this.#name = name;
     this.#health = 100;
     this.#score = 0;
@@ -33,7 +34,6 @@ export class Player {
     this.#shootCoolDown = 100;
     this.#color = localStorage.color ? localStorage.color : 'salmon';
     this.#shootTimer = 0;
-    // console.log(this);
   }
 
   // The bounds are going to change depending on the level size (not decided yet)
@@ -43,14 +43,12 @@ export class Player {
   }
 
   checkDamage(progress, source) {
-    // console.log('test');
     this.#immunityFrames -= progress;
-    if (this.#immunityFrames <= 0) {
-      this.#immunityFrames = 300;
-      this.#takeDamage(source);
-      return true;
-    }
-    return false;
+    if (this.#immunityFrames > 0) return false;
+
+    this.#immunityFrames = 300;
+    this.#takeDamage(source);
+    return true;
   }
 
   update(progress = Number) {
@@ -71,10 +69,15 @@ export class Player {
       move.x = -this.speed;
     }
 
-    if ((move.x) && (move.x == move.y || -move.x == move.y)) {
+    if (
+      (move.x) &&
+      (move.x == move.y || -move.x == move.y)
+    ) {
+
       move.x = this.diagSpeed * Math.sign(move.x);
       move.y = this.diagSpeed * Math.sign(move.y);
     }
+    // console.log(progress, move);
     move.x *= progress;
     move.y *= progress;
 
@@ -83,7 +86,7 @@ export class Player {
     this.#shootTimer += progress;
     if (KeysPressed[localStorage.shoot]) {
       if (this.#shootTimer >= this.#shootCoolDown) {
-        console.log('user shot');
+        // console.log('user shot');
         this.#shootTimer = 0;
         fireBullet();
       }
@@ -113,8 +116,11 @@ export class Player {
     window.location.replace('/index.html');
   }
 
+  removeDamagedOverlay() { this.#damageWasTaken = false; }
+
   #takeDamage(source) {
-    // console.log(this.#health);
+    this.#damageWasTaken = true;
+    setInterval((player) => { player.removeDamagedOverlay(); }, 300, this);
     this.#health -= source.damage;
     if (this.#health < 0) this.die();
     update_ui_health(this.#health);
@@ -135,7 +141,14 @@ export class Player {
     ctx.fillStyle = 'Black';
     ctx.fillText(this.#name, this.#position.x + this.#sprite.width * 0.5 - ctx.measureText(this.#name).width * 0.5, this.#position.y + 100);
     ctx.font = '30px Tahoma';
-
     drawBullets(ctx);
+    
+    if (!this.#damageWasTaken){ return; }
+
+    ctx.fillStyle = `rgba(255,0,0,0.4)`;
+    ctx.beginPath();
+    ctx.arc(this.#position.x + this.#sprite.width * 0.5, this.#position.y + this.#sprite.height * 0.5, this.#sprite.width * 0.5, 0, 2 * Math.PI);
+    ctx.fill();
+
   }
 }

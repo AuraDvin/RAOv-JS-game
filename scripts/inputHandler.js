@@ -23,9 +23,9 @@ export function areSettingsSet() {
 
 export function setDefaults() {
     for (let i in defaults) {
-        console.log(`Now is ${i}`);
+        // console.log(`Now is ${i}`);
         for (let j in defaults[i]) {
-            console.log(`And also ${j}`);
+            // console.log(`And also ${j}`);
             if (i === 'move') {
                 localStorage[j] = defaults[i][j];
             } else if (i === 'music') {

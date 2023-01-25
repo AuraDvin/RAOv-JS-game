@@ -35,17 +35,17 @@ class Bullet {
 
         this.#livingTime = 0;
     }
-    
+
     #checkInBounds() {
         this.#position.x = Math.min(Math.max(0, this.#position.x), 7680);
         this.#position.y = Math.min(Math.max(0, this.#position.y), 4320);
     }
-    
+
     #checkLivingTime() {
-        if (this.#livingTime < 400) return; 
+        if (this.#livingTime < 400) return;
         removeFromList(this.id);
     }
-    
+
     #setCollisionRect() {
         this.collisionRect.x1 = this.#position.x;
         this.collisionRect.y1 = this.#position.y;
@@ -54,7 +54,7 @@ class Bullet {
     }
 
     getDamage() { return this.damage; }
-    
+
     AABB(otherRect) {
         this.#setCollisionRect();
         if (
@@ -62,7 +62,7 @@ class Bullet {
             otherRect.x2 >= this.collisionRect.x1 &&
             this.collisionRect.y2 >= otherRect.y1 &&
             otherRect.y2 >= this.collisionRect.y1
-            ) {
+        ) {
             return true;
         }
         return false;
@@ -74,7 +74,7 @@ class Bullet {
         this.pathfind();
         this.move();
     }
-    
+
     pathfind() {
         // console.table(this);
         const deltaX = this.startDirection.x - this.#position.x;
@@ -85,16 +85,16 @@ class Bullet {
         // debugger;
         this.direction.x = Math.floor(deltaX * delta);
         this.direction.y = Math.floor(deltaY * delta);
-        
+
     }
-    
+
     move() {
         this.#position.x += this.direction.x;
         this.#position.y += this.direction.y;
         this.#checkInBounds();
     }
-    
-    
+
+
     draw(ctx) {
         ctx.fillStyle = this.#style;
 
@@ -105,7 +105,7 @@ class Bullet {
         ctx.lineTo(this.#position.x, this.#position.y + this.#size.height);
         ctx.fill();
     }
-    
+
 }
 
 
@@ -121,7 +121,7 @@ export function getMousePosition(e) {
     const playerY = player.getPosition().y;
 
     mouse.x = (e.pageX - halfCanvasWidth) + playerX + halfPlayerWidth;
-    mouse.y = (e.pageY - halfCanvasHeight) + playerY + halfPlayerHeight; 
+    mouse.y = (e.pageY - halfCanvasHeight) + playerY + halfPlayerHeight;
 }
 
 export function fireBullet() {
@@ -149,7 +149,6 @@ export function bulletCollision(progress, mob) {
         if (bulletArray[i].AABB(mob.collisionRect)) {
             mob.dealDamage(bulletArray[i]);
             removeFromList(bulletArray[i].id);
-            
         }
     }
 }
