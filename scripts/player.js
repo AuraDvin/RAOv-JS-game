@@ -113,7 +113,7 @@ export class Player {
   // Just takes you to the first site
   die() {
     alert('You have died');
-    window.location.replace('/index.html');
+    window.location.replace('./index.html');
   }
 
   removeDamagedOverlay() { this.#damageWasTaken = false; }
